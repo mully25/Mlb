@@ -1,14 +1,37 @@
 """
-MLB xwOBA Top 10 – Instagram-ready graphic (1080x1350)
-Usage: python3 xwoba_graphic.py [path/to/player_photo.jpg]
+MLB Top 10 stat graphic – Instagram-ready (1080x1350)
+Usage: python3 xwoba_graphic.py [photo.jpg] [stat]
+
+  stat options:
+    xwoba  (default) – Expected Weighted On-Base Average
+    ba               – Batting Average
+    xba              – Expected Batting Average
+    slg              – Slugging Percentage
+    xslg             – Expected Slugging Percentage
+    woba             – Weighted On-Base Average
 """
 import sys, io, requests, pandas as pd, numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 from datetime import date
 
+# ── Stat config ──────────────────────────────────────────────────────────────
+STAT_CONFIG = {
+    "xwoba": {"col": "est_woba", "title": "xwOBA LEADERS",       "footer": "Statcast xwOBA",          "fmt": lambda v: f".{int(round(v*1000)):03d}"},
+    "ba":    {"col": "ba",       "title": "BATTING AVG LEADERS",  "footer": "Batting Average",          "fmt": lambda v: f".{int(round(v*1000)):03d}"},
+    "xba":   {"col": "est_ba",   "title": "xBA LEADERS",          "footer": "Statcast xBA",             "fmt": lambda v: f".{int(round(v*1000)):03d}"},
+    "slg":   {"col": "slg",      "title": "SLUGGING LEADERS",     "footer": "Slugging Percentage",      "fmt": lambda v: f".{int(round(v*1000)):03d}"},
+    "xslg":  {"col": "est_slg",  "title": "xSLG LEADERS",         "footer": "Statcast xSLG",            "fmt": lambda v: f".{int(round(v*1000)):03d}"},
+    "woba":  {"col": "woba",     "title": "wOBA LEADERS",         "footer": "Weighted On-Base Average", "fmt": lambda v: f".{int(round(v*1000)):03d}"},
+}
+
 # ── Layout ──────────────────────────────────────────────────────────────────
 W, H       = 1080, 1350
 IMAGE_PATH = sys.argv[1] if len(sys.argv) > 1 else None
+STAT_KEY   = sys.argv[2].lower() if len(sys.argv) > 2 else "xwoba"
+if STAT_KEY not in STAT_CONFIG:
+    print(f"Unknown stat '{STAT_KEY}'. Options: {', '.join(STAT_CONFIG)}")
+    sys.exit(1)
+STAT = STAT_CONFIG[STAT_KEY]
 
 # ── Fonts ───────────────────────────────────────────────────────────────────
 F = "/usr/share/fonts/truetype/open-sans/"
@@ -66,12 +89,17 @@ def side_gradient(width, height, color_rgb, solid_until=0.52, fade_end=0.90):
 
 # ── Fetch data ───────────────────────────────────────────────────────────────
 def fetch_top10():
-    # Same source as Baseball Savant's expected stats leaderboard (min 25 BIP)
+    import time
     url = "https://baseballsavant.mlb.com/expected_statistics"
     params = {"type":"batter","year":"2026","position":"","team":"","min":"25","csv":"true"}
-    resp = requests.get(url, params=params,
-                        headers={"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"},
-                        timeout=30)
+    headers = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"}
+    for attempt in range(5):
+        resp = requests.get(url, params=params, headers=headers, timeout=30)
+        if resp.status_code == 200 and "last_name" in resp.text:
+            break
+        wait = 2 ** attempt
+        print(f"  Baseball Savant returned {resp.status_code}, retrying in {wait}s…")
+        time.sleep(wait)
     resp.raise_for_status()
     text = resp.text.lstrip('﻿')
     df = pd.read_csv(io.StringIO(text))
@@ -79,10 +107,10 @@ def fetch_top10():
     nc = df.columns[0]
     df[["last","first"]] = df[nc].str.split(", ", n=1, expand=True)
     df["name"]  = df["first"].str.strip() + " " + df["last"].str.strip()
-    df["xwoba"] = pd.to_numeric(df["est_woba"].astype(str).str.strip(), errors="coerce")
+    df["val"]   = pd.to_numeric(df[STAT["col"]].astype(str).str.strip(), errors="coerce")
     df["bip"]   = pd.to_numeric(df["bip"], errors="coerce")
     df = df[df["bip"] >= 25]
-    top10 = df.nlargest(10, "xwoba").reset_index(drop=True)
+    top10 = df.nlargest(10, "val").reset_index(drop=True)
     top10["rank"] = range(1, 11)
     return top10
 
@@ -104,7 +132,9 @@ def fetch_team(pid):
     return "Unknown"
 
 # ── Build ────────────────────────────────────────────────────────────────────
-def build(top10, output="/home/user/Mlb/xwoba_top10.png"):
+def build(top10, output=None):
+    if output is None:
+        output = f"/home/user/Mlb/{STAT_KEY}_top10.png"
     canvas = Image.new("RGBA", (W, H), (*BG, 255))
 
     # ── right side: player photo ─────────────────────────────────────────
@@ -143,7 +173,7 @@ def build(top10, output="/home/user/Mlb/xwoba_top10.png"):
 
     # subtitle
     f_sub = font("OpenSans-Bold.ttf", 38)
-    put(d, "xwOBA LEADERS", ML, y, f_sub, LIGHT)
+    put(d, STAT["title"], ML, y, f_sub, LIGHT)
     y += th(d, "x", f_sub) + 14
 
     # red rule
@@ -176,7 +206,7 @@ def build(top10, output="/home/user/Mlb/xwoba_top10.png"):
     for i, row in top10.iterrows():
         rank  = int(row["rank"])
         name  = row["name"]
-        xwoba = row["xwoba"]
+        xwoba = row["val"]
         team  = row.get("team", "Unknown")
         color = TEAM_COLORS.get(team, (70, 80, 95))
 
@@ -222,8 +252,8 @@ def build(top10, output="/home/user/Mlb/xwoba_top10.png"):
         # name text centered inside pill
         put(d, display, pill_x + PAD_X, pill_y + PAD_Y, f_name, WHITE)
 
-        # xwoba value
-        stat_str = f".{int(round(xwoba * 1000)):03d}"
+        # stat value
+        stat_str = STAT["fmt"](xwoba)
         sx = pill_x + pill_w + 16
         sh2 = th(d, stat_str, f_stat)
         put(d, stat_str, sx, mid_y - sh2 // 2, f_stat, WHITE)
@@ -233,7 +263,7 @@ def build(top10, output="/home/user/Mlb/xwoba_top10.png"):
     d.rectangle([0, fy, W, H], fill=(*PANEL, 255))
     d.rectangle([0, fy, W, fy + 2], fill=(*ACCENT_RED, 255))
     f_foot = font("OpenSans-Regular.ttf", 21)
-    foot_text = "Data: baseballsavant.mlb.com  ·  Statcast xwOBA  ·  Min. PA to qualify"
+    foot_text = f"Data: baseballsavant.mlb.com  ·  {STAT['footer']}  ·  Min. 25 BIP"
     put(d, foot_text, ML, fy + (FOOTER_H - th(d, "x", f_foot)) // 2, f_foot, DIM)
 
     # ── save ──────────────────────────────────────────────────────────────
@@ -243,7 +273,7 @@ def build(top10, output="/home/user/Mlb/xwoba_top10.png"):
 
 # ── Entry point ──────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    print("Fetching xwOBA leaderboard…")
+    print(f"Fetching {STAT['title']}…")
     top10 = fetch_top10()
 
     print("Fetching team data…")
