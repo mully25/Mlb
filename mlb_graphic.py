@@ -41,9 +41,9 @@ STAT_CONFIG = {
         "endpoint": "expected",           "fmt": _avg,
     },
     "ba": {
-        "col": "ba",        "secondary": "est_ba",   "sec_label": "xBA",
+        "col": "est_ba",    "secondary": "ba",       "sec_label": "BA",
         "diff_col": "est_ba_minus_ba_diff",
-        "title": "BATTING AVG LEADERS",   "footer": "Batting Average  ·  xBA  ·  Diff",
+        "title": "xBA LEADERS",           "footer": "xBA  ·  Batting Average  ·  Diff",
         "endpoint": "expected",           "fmt": _avg,
     },
     "obp": {
@@ -53,15 +53,15 @@ STAT_CONFIG = {
         "custom_sel": "on_base_percent",  "fmt": _avg,
     },
     "slg": {
-        "col": "slg",       "secondary": "est_slg",  "sec_label": "xSLG",
+        "col": "est_slg",   "secondary": "slg",      "sec_label": "SLG",
         "diff_col": "est_slg_minus_slg_diff",
-        "title": "SLUGGING LEADERS",      "footer": "Slugging  ·  xSLG  ·  Diff",
+        "title": "xSLG LEADERS",          "footer": "xSLG  ·  Slugging  ·  Diff",
         "endpoint": "expected",           "fmt": _avg,
     },
     "woba": {
-        "col": "woba",      "secondary": "est_woba",  "sec_label": "xwOBA",
+        "col": "est_woba",  "secondary": "woba",     "sec_label": "wOBA",
         "diff_col": "est_woba_minus_woba_diff",
-        "title": "wOBA LEADERS",          "footer": "wOBA  ·  xwOBA  ·  Diff",
+        "title": "xwOBA LEADERS",         "footer": "xwOBA  ·  wOBA  ·  Diff",
         "endpoint": "expected",           "fmt": _avg,
     },
 }
