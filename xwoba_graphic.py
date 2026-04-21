@@ -66,19 +66,22 @@ def side_gradient(width, height, color_rgb, solid_until=0.52, fade_end=0.90):
 
 # ── Fetch data ───────────────────────────────────────────────────────────────
 def fetch_top10():
-    url = "https://baseballsavant.mlb.com/leaderboard/custom"
-    params = {"year":"2026","type":"batter","filter":"","min":"q",
-              "selections":"xwoba","chart":"false","x":"xwoba","y":"xwoba",
-              "r":"no","chartType":"bbs","csv":"true"}
+    # Same source as Baseball Savant's expected stats leaderboard (min 25 BIP)
+    url = "https://baseballsavant.mlb.com/expected_statistics"
+    params = {"type":"batter","year":"2026","position":"","team":"","min":"25","csv":"true"}
     resp = requests.get(url, params=params,
-                        headers={"User-Agent":"Mozilla/5.0"}, timeout=30)
+                        headers={"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"},
+                        timeout=30)
     resp.raise_for_status()
-    df = pd.read_csv(io.StringIO(resp.text))
+    text = resp.text.lstrip('﻿')
+    df = pd.read_csv(io.StringIO(text))
     df.columns = df.columns.str.strip()
     nc = df.columns[0]
     df[["last","first"]] = df[nc].str.split(", ", n=1, expand=True)
     df["name"]  = df["first"].str.strip() + " " + df["last"].str.strip()
-    df["xwoba"] = df["xwoba"].astype(str).str.strip().astype(float)
+    df["xwoba"] = pd.to_numeric(df["est_woba"].astype(str).str.strip(), errors="coerce")
+    df["bip"]   = pd.to_numeric(df["bip"], errors="coerce")
+    df = df[df["bip"] >= 25]
     top10 = df.nlargest(10, "xwoba").reset_index(drop=True)
     top10["rank"] = range(1, 11)
     return top10
