@@ -91,7 +91,7 @@ def side_gradient(width, height, color_rgb, solid_until=0.52, fade_end=0.90):
 def fetch_top10():
     import time
     url = "https://baseballsavant.mlb.com/expected_statistics"
-    params = {"type":"batter","year":"2026","position":"","team":"","min":"25","csv":"true"}
+    params = {"type":"batter","year":"2026","position":"","team":"","min":"q","csv":"true"}
     headers = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"}
     for attempt in range(5):
         resp = requests.get(url, params=params, headers=headers, timeout=30)
@@ -108,8 +108,6 @@ def fetch_top10():
     df[["last","first"]] = df[nc].str.split(", ", n=1, expand=True)
     df["name"]  = df["first"].str.strip() + " " + df["last"].str.strip()
     df["val"]   = pd.to_numeric(df[STAT["col"]].astype(str).str.strip(), errors="coerce")
-    df["bip"]   = pd.to_numeric(df["bip"], errors="coerce")
-    df = df[df["bip"] >= 25]
     top10 = df.nlargest(10, "val").reset_index(drop=True)
     top10["rank"] = range(1, 11)
     return top10
@@ -263,7 +261,7 @@ def build(top10, output=None):
     d.rectangle([0, fy, W, H], fill=(*PANEL, 255))
     d.rectangle([0, fy, W, fy + 2], fill=(*ACCENT_RED, 255))
     f_foot = font("OpenSans-Regular.ttf", 21)
-    foot_text = f"Data: baseballsavant.mlb.com  ·  {STAT['footer']}  ·  Min. 25 BIP"
+    foot_text = f"Data: baseballsavant.mlb.com  ·  {STAT['footer']}  ·  Qualified PA"
     put(d, foot_text, ML, fy + (FOOTER_H - th(d, "x", f_foot)) // 2, f_foot, DIM)
 
     # ── save ──────────────────────────────────────────────────────────────
