@@ -164,7 +164,7 @@ def _get(url, params):
 def fetch_top10():
     if STAT["endpoint"] == "expected":
         text = _get("https://baseballsavant.mlb.com/expected_statistics",
-                    {"type":"batter","year":"2026","position":"","team":"","min":"25","csv":"true"})
+                    {"type":"batter","year":"2026","position":"","team":"","min":"q","csv":"true"})
         df = pd.read_csv(io.StringIO(text.lstrip('﻿')))
         df.columns = df.columns.str.strip()
         nc = df.columns[0]
@@ -177,7 +177,7 @@ def fetch_top10():
         if STAT.get("diff_col"):
             # API stores (expected - actual); negate so positive = outperforming
             df["diff_val"] = pd.to_numeric(df[STAT["diff_col"]].astype(str).str.strip(), errors="coerce") * -1
-        df = df[df["bip"] >= 25]
+        # "q" filter is applied server-side; no client-side BIP filter needed
     else:
         # custom leaderboard (OBP etc.)
         text = _get("https://baseballsavant.mlb.com/leaderboard/custom",
@@ -259,7 +259,7 @@ def build(top10, output=None):
 
     f_lbl = font("OpenSans-Semibold.ttf", 24)
     today = date.today().strftime("%-m/%-d/%y")
-    put(d, f"2026 MLB Season  ·  Min. 25 BIP  ·  As of {today}", ML, y, f_lbl, DIM)
+    put(d, f"2026 MLB Season  ·  Qualified PA  ·  As of {today}", ML, y, f_lbl, DIM)
     y += th(d, "x", f_lbl) + 36
 
     # ── player rows ───────────────────────────────────────────────────────
@@ -376,7 +376,7 @@ def build(top10, output=None):
     d.rectangle([0, fy, W, H], fill=(*PANEL, 255))
     d.rectangle([0, fy, W, fy + 2], fill=(*ACCENT_RED, 255))
     f_foot = font("OpenSans-Regular.ttf", 21)
-    foot   = f"Data: baseballsavant.mlb.com  ·  {STAT['footer']}  ·  Min. 25 BIP"
+    foot   = f"Data: baseballsavant.mlb.com  ·  {STAT['footer']}  ·  Qualified PA"
     put(d, foot, ML, fy + (FOOTER_H - th(d, "x", f_foot)) // 2, f_foot, DIM)
 
     canvas.convert("RGB").save(output, "PNG")
