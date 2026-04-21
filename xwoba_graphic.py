@@ -4,6 +4,7 @@ Usage: python3 xwoba_graphic.py [path/to/player_photo.jpg]
 """
 import sys, io, requests, pandas as pd, numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
+from datetime import date
 
 # ── Layout ──────────────────────────────────────────────────────────────────
 W, H       = 1080, 1350
@@ -83,13 +84,20 @@ def fetch_top10():
     return top10
 
 def fetch_team(pid):
-    r = requests.get(
-        f"https://statsapi.mlb.com/api/v1/people/{pid}/stats"
-        f"?stats=gameLog&season=2026&group=hitting",
-        headers={"User-Agent":"Mozilla/5.0"}, timeout=10)
-    splits = r.json().get("stats", [{}])
-    if splits and splits[0].get("splits"):
-        return splits[0]["splits"][-1].get("team", {}).get("name", "Unknown")
+    import time
+    for attempt in range(3):
+        try:
+            r = requests.get(
+                f"https://statsapi.mlb.com/api/v1/people/{pid}/stats"
+                f"?stats=gameLog&season=2026&group=hitting",
+                headers={"User-Agent":"Mozilla/5.0"}, timeout=10)
+            splits = r.json().get("stats", [{}])
+            if splits and splits[0].get("splits"):
+                return splits[0]["splits"][-1].get("team", {}).get("name", "Unknown")
+            return "Unknown"
+        except Exception:
+            if attempt < 2:
+                time.sleep(1.5)
     return "Unknown"
 
 # ── Build ────────────────────────────────────────────────────────────────────
@@ -141,7 +149,8 @@ def build(top10, output="/home/user/Mlb/xwoba_top10.png"):
 
     # season label
     f_lbl = font("OpenSans-Semibold.ttf", 24)
-    put(d, "2026 MLB Season  ·  Qualified Batters", ML, y, f_lbl, DIM)
+    today = date.today().strftime("%-m/%-d/%y")
+    put(d, f"2026 MLB Season  ·  Qualified Batters  ·  As of {today}", ML, y, f_lbl, DIM)
     y += th(d, "x", f_lbl) + 36
 
     # ── player rows ───────────────────────────────────────────────────────
