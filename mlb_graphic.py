@@ -29,31 +29,40 @@ def _avg(v):
     return f".{int(round(v * 1000)):03d}"
 
 STAT_CONFIG = {
+    # col       = primary sort/display column in the CSV
+    # secondary = companion expected-stat column
+    # sec_label = short label shown before expected value
+    # diff_col  = API column for (expected - actual); we negate it to get actual - expected
+    # endpoint  = "expected" | "custom"
+    # custom_sel= Baseball Savant selections key when endpoint="custom"
     "xwoba": {
-        "col": "est_woba",   "secondary": None,
-        "title": "xwOBA LEADERS",          "footer": "Statcast xwOBA",
-        "endpoint": "expected",            "fmt": _avg,
+        "col": "est_woba",  "secondary": None,       "diff_col": None,
+        "title": "xwOBA LEADERS",         "footer": "Statcast xwOBA",
+        "endpoint": "expected",           "fmt": _avg,
     },
     "ba": {
-        "col": "ba",         "secondary": "est_ba",  "sec_label": "xBA",
-        "title": "BATTING AVG LEADERS",    "footer": "Batting Average  ·  with xBA",
-        "endpoint": "expected",            "fmt": _avg,
+        "col": "ba",        "secondary": "est_ba",   "sec_label": "xBA",
+        "diff_col": "est_ba_minus_ba_diff",
+        "title": "BATTING AVG LEADERS",   "footer": "Batting Average  ·  xBA  ·  Diff",
+        "endpoint": "expected",           "fmt": _avg,
     },
     "obp": {
-        "col": "on_base_percent", "secondary": None,
-        "title": "OBP LEADERS",            "footer": "On-Base Percentage",
+        "col": "on_base_percent", "secondary": None, "diff_col": None,
+        "title": "OBP LEADERS",           "footer": "On-Base Percentage  ·  (no Statcast xOBP)",
         "endpoint": "custom",
-        "custom_sel": "on_base_percent",   "fmt": _avg,
+        "custom_sel": "on_base_percent",  "fmt": _avg,
     },
     "slg": {
-        "col": "slg",        "secondary": None,
-        "title": "SLUGGING LEADERS",       "footer": "Slugging Percentage",
-        "endpoint": "expected",            "fmt": _avg,
+        "col": "slg",       "secondary": "est_slg",  "sec_label": "xSLG",
+        "diff_col": "est_slg_minus_slg_diff",
+        "title": "SLUGGING LEADERS",      "footer": "Slugging  ·  xSLG  ·  Diff",
+        "endpoint": "expected",           "fmt": _avg,
     },
     "woba": {
-        "col": "woba",       "secondary": None,
-        "title": "wOBA LEADERS",           "footer": "Weighted On-Base Average",
-        "endpoint": "expected",            "fmt": _avg,
+        "col": "woba",      "secondary": "est_woba",  "sec_label": "xwOBA",
+        "diff_col": "est_woba_minus_woba_diff",
+        "title": "wOBA LEADERS",          "footer": "wOBA  ·  xwOBA  ·  Diff",
+        "endpoint": "expected",           "fmt": _avg,
     },
 }
 
@@ -163,9 +172,11 @@ def fetch_top10():
         df["name"] = df["first"].str.strip() + " " + df["last"].str.strip()
         df["val"]  = pd.to_numeric(df[STAT["col"]].astype(str).str.strip(), errors="coerce")
         df["bip"]  = pd.to_numeric(df["bip"], errors="coerce")
-        # carry secondary col if needed
         if STAT.get("secondary"):
             df["sec_val"] = pd.to_numeric(df[STAT["secondary"]].astype(str).str.strip(), errors="coerce")
+        if STAT.get("diff_col"):
+            # API stores (expected - actual); negate so positive = outperforming
+            df["diff_val"] = pd.to_numeric(df[STAT["diff_col"]].astype(str).str.strip(), errors="coerce") * -1
         df = df[df["bip"] >= 25]
     else:
         # custom leaderboard (OBP etc.)
@@ -207,7 +218,8 @@ def build(top10, output=None):
     if output is None:
         output = f"/home/user/Mlb/{STAT_KEY}_top10.png"
 
-    HAS_SEC = bool(STAT.get("secondary") and "sec_val" in top10.columns)
+    HAS_SEC  = bool(STAT.get("secondary") and "sec_val" in top10.columns)
+    HAS_DIFF = bool(STAT.get("diff_col") and "diff_val" in top10.columns)
 
     canvas = Image.new("RGBA", (W, H), (*BG, 255))
 
@@ -262,10 +274,13 @@ def build(top10, output=None):
     f_stat   = font("OpenSans-ExtraBold.ttf", 38)
     f_sec    = font("OpenSans-Bold.ttf", 24)
     f_seclbl = font("OpenSans-Semibold.ttf", 19)
+    f_diff   = font("OpenSans-Bold.ttf", 22)
+
+    GREEN = (80, 220, 120)
+    RED   = (230, 80,  80)
 
     RANK_COL_W = 64
-    # narrower pill when showing two stats
-    MAX_NAME_W = 260 if HAS_SEC else 320
+    MAX_NAME_W = 240 if HAS_SEC else 320
 
     for i, row in top10.iterrows():
         rank  = int(row["rank"])
@@ -316,25 +331,42 @@ def build(top10, output=None):
         sx = pill_x + pw2 + 16
 
         if HAS_SEC:
-            # primary value (large)
             primary_str = STAT["fmt"](val)
-            ph_px = th(d, primary_str, f_stat)
-            sec_val = row.get("sec_val", float("nan"))
-            sec_str = STAT["fmt"](sec_val) if pd.notna(sec_val) else "—"
-            lbl_str = STAT.get("sec_label", "")
+            sec_val     = row.get("sec_val", float("nan"))
+            diff_val    = row.get("diff_val", float("nan"))
+            sec_str     = STAT["fmt"](sec_val) if pd.notna(sec_val) else "—"
+            lbl_str     = STAT.get("sec_label", "")
 
-            # stack: primary on top half, secondary label + value on bottom half
-            gap = 2
-            total_h = ph_px + gap + th(d, lbl_str, f_seclbl)
-            top_chunk = mid_y - total_h // 2
+            # diff string and color
+            if pd.notna(diff_val):
+                sign      = "+" if diff_val >= 0 else ""
+                diff_str  = f"{sign}{diff_val:+.3f}".replace("+", "+").lstrip()
+                diff_str  = f"{sign}{abs(diff_val):.3f}"
+                diff_str  = ("+" if diff_val >= 0 else "-") + f"{abs(diff_val):.3f}"
+                diff_color = GREEN if diff_val >= 0 else RED
+            else:
+                diff_str, diff_color = "", DIM2
 
-            put(d, primary_str, sx, top_chunk, f_stat, WHITE)
-            lbl_x = sx
-            lbl_y = top_chunk + ph_px + gap
-            put(d, lbl_str, lbl_x, lbl_y + 3, f_seclbl, DIM2)
-            put(d, sec_str, lbl_x + tw(d, lbl_str + " ", f_seclbl), lbl_y, f_sec, LIGHT)
+            # layout: two lines stacked
+            # line 1: primary value (large)
+            # line 2: xLABEL value   ±diff
+            gap     = 3
+            line1_h = th(d, primary_str, f_stat)
+            line2_h = th(d, lbl_str, f_seclbl)
+            total_h = line1_h + gap + line2_h
+            top_y   = mid_y - total_h // 2
+
+            put(d, primary_str, sx, top_y, f_stat, WHITE)
+
+            line2_y = top_y + line1_h + gap
+            lbl_w   = tw(d, lbl_str + " ", f_seclbl)
+            put(d, lbl_str, sx, line2_y + 3, f_seclbl, DIM2)
+            put(d, sec_str, sx + lbl_w, line2_y, f_sec, LIGHT)
+
+            if diff_str:
+                diff_x = sx + lbl_w + tw(d, sec_str, f_sec) + 10
+                put(d, diff_str, diff_x, line2_y + 2, f_diff, diff_color)
         else:
-            # single value
             sv  = STAT["fmt"](val)
             sh2 = th(d, sv, f_stat)
             put(d, sv, sx, mid_y - sh2 // 2, f_stat, WHITE)
