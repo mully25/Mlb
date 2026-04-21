@@ -280,7 +280,7 @@ def build(top10, output=None):
     RED   = (230, 80,  80)
 
     RANK_COL_W = 64
-    MAX_NAME_W = 240 if HAS_SEC else 320
+    MAX_NAME_W = 310 if HAS_SEC else 380
 
     for i, row in top10.iterrows():
         rank  = int(row["rank"])
@@ -306,14 +306,16 @@ def build(top10, output=None):
 
         # player name pill
         pill_x   = ML + RANK_COL_W + 10
-        display  = name
-        while tw(d, display, f_name) > MAX_NAME_W - PAD_X * 2 and len(display) > 3:
-            display = display[:-1]
-        if display != name:
-            display = display.rstrip() + "…"
+        # scale font down until full name fits — never truncate
+        name_fnt = f_name
+        for size in range(31, 17, -1):
+            name_fnt = font("OpenSans-Bold.ttf", size)
+            if tw(d, name, name_fnt) <= MAX_NAME_W - PAD_X * 2:
+                break
+        display = name
 
-        nw  = tw(d, display, f_name)
-        nh  = th(d, display, f_name)
+        nw  = tw(d, display, name_fnt)
+        nh  = th(d, display, name_fnt)
         pw2 = nw + PAD_X * 2
         ph2 = nh + PAD_Y * 2
         py  = mid_y - ph2 // 2
@@ -325,7 +327,7 @@ def build(top10, output=None):
         d.rounded_rectangle(
             [pill_x, py, pill_x + pw2, py + ph2],
             radius=PILL_R, fill=(*color, 255))
-        put(d, display, pill_x + PAD_X, py + PAD_Y, f_name, WHITE)
+        put(d, display, pill_x + PAD_X, py + PAD_Y, name_fnt, WHITE)
 
         # stat value(s)
         sx = pill_x + pw2 + 16

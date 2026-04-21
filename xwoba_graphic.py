@@ -199,7 +199,7 @@ def build(top10, output=None):
 
     RANK_COL_W = 64
     STAT_COL_W = 96
-    MAX_NAME_W = 320   # max pill width for name
+    MAX_NAME_W = 380
 
     for i, row in top10.iterrows():
         rank  = int(row["rank"])
@@ -226,14 +226,15 @@ def build(top10, output=None):
 
         # pill: truncate name to fit
         pill_x = ML + RANK_COL_W + 10
+        name_fnt = f_name
+        for size in range(31, 17, -1):
+            name_fnt = font("OpenSans-Bold.ttf", size)
+            if tw(d, name, name_fnt) <= MAX_NAME_W - PAD_X * 2:
+                break
         display = name
-        while tw(d, display, f_name) > MAX_NAME_W - PAD_X * 2 and len(display) > 3:
-            display = display[:-1]
-        if display != name:
-            display = display.rstrip() + "…"
 
-        name_w_px = tw(d, display, f_name)
-        name_h_px = th(d, display, f_name)
+        name_w_px = tw(d, display, name_fnt)
+        name_h_px = th(d, display, name_fnt)
         pill_w = name_w_px + PAD_X * 2
         pill_h = name_h_px + PAD_Y * 2
         pill_y = mid_y - pill_h // 2
@@ -248,7 +249,7 @@ def build(top10, output=None):
             [pill_x, pill_y, pill_x + pill_w, pill_y + pill_h],
             radius=PILL_R, fill=(*color, 255))
         # name text centered inside pill
-        put(d, display, pill_x + PAD_X, pill_y + PAD_Y, f_name, WHITE)
+        put(d, display, pill_x + PAD_X, pill_y + PAD_Y, name_fnt, WHITE)
 
         # stat value
         stat_str = STAT["fmt"](xwoba)
