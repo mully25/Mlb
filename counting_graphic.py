@@ -168,14 +168,21 @@ def fetch_top10():
     return top10
 
 def fetch_team(pid, ptype):
-    group = "hitting" if ptype == "batter" else "pitching"
+    headers = {"User-Agent": "Mozilla/5.0"}
     for attempt in range(3):
         try:
-            r = requests.get(
-                f"https://statsapi.mlb.com/api/v1/people/{pid}/stats"
-                f"?stats=gameLog&season=2026&group={group}",
-                headers={"User-Agent":"Mozilla/5.0"}, timeout=10)
-            splits = r.json().get("stats", [{}])
+            # try current team directly first — works even without game log
+            r = requests.get(f"https://statsapi.mlb.com/api/v1/people/{pid}?hydrate=currentTeam",
+                             headers=headers, timeout=10)
+            team = r.json().get("people", [{}])[0].get("currentTeam", {}).get("name", "")
+            if team:
+                return team
+            # fallback: game log
+            group = "hitting" if ptype == "batter" else "pitching"
+            r2 = requests.get(f"https://statsapi.mlb.com/api/v1/people/{pid}/stats"
+                              f"?stats=gameLog&season=2026&group={group}",
+                              headers=headers, timeout=10)
+            splits = r2.json().get("stats", [{}])
             if splits and splits[0].get("splits"):
                 return splits[0]["splits"][-1].get("team", {}).get("name", "Unknown")
             return "Unknown"
