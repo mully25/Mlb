@@ -315,6 +315,16 @@ def build(top10, output=None):
     canvas.convert("RGB").save(output, "PNG")
     print(f"Saved → {output}")
 
+PHOTOS_DIR = "/home/user/Mlb/photos"
+
+def leader_photo(name):
+    import os
+    for ext in ("jpg", "jpeg", "png"):
+        p = os.path.join(PHOTOS_DIR, f"{name}.{ext}")
+        if os.path.exists(p):
+            return p
+    return None
+
 # ── Entry point ───────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     print(f"Fetching {STAT['title']}…")
@@ -327,6 +337,12 @@ if __name__ == "__main__":
         teams.append(team)
         print(f"  {row['name']:<25} → {team}")
     top10["team"] = teams
+
+    if not IMAGE_PATH:
+        auto = leader_photo(top10.iloc[0]["name"])
+        if auto:
+            globals()["IMAGE_PATH"] = auto
+            print(f"Auto photo: {auto}")
 
     print("\nBuilding graphic…")
     build(top10)
