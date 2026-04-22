@@ -20,7 +20,7 @@ Usage: python3 counting_graphic.py [photo.jpg] [stat]
     whip  – WHIP (lowest = best)
     warp  – WAR (pitchers)
 """
-import sys, io, time, requests, pandas as pd, numpy as np
+import sys, io, os, time, requests, pandas as pd, numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 from datetime import date
 
@@ -62,7 +62,7 @@ STAT = STAT_CONFIG[STAT_KEY]
 W, H = 1080, 1350
 
 # ── Fonts ─────────────────────────────────────────────────────────────────────
-FD = "/usr/share/fonts/truetype/open-sans/"
+FD = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fonts") + "/"
 def font(name, size):
     return ImageFont.truetype(FD + name, size)
 
