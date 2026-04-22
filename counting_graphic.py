@@ -342,7 +342,7 @@ if __name__ == "__main__":
     top10["team"] = teams
 
     # auto-select leader photo if no photo was passed on the command line
-    if not IMAGE_PATH:
+    if not IMAGE_PATH and not __import__("os").getenv("NO_AUTO_PHOTO"):
         leader = top10.iloc[0]
         auto = leader_photo(leader["name"], int(leader["player_id"]))
         if auto:

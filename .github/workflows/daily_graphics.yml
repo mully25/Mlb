@@ -32,6 +32,8 @@ jobs:
         run: pip install pillow pandas numpy requests
 
       - name: Generate graphics
+        env:
+          NO_AUTO_PHOTO: "1"
         run: |
           python3 mlb_graphic.py "" ba
           python3 mlb_graphic.py "" slg
@@ -44,6 +46,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add ba_top10.png slg_top10.png woba_top10.png era_top10.png hr_top10.png obp_top10.png photos/
+          git add ba_top10.png slg_top10.png woba_top10.png era_top10.png hr_top10.png obp_top10.png
           git diff --staged --quiet || git commit -m "Auto-update graphics $(date +'%-m/%-d/%y')"
           git push
