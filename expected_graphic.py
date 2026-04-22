@@ -124,11 +124,11 @@ def side_gradient(width, height, color_rgb, solid_until=0.52, fade_end=0.90):
 # ── Data fetching ─────────────────────────────────────────────────────────────
 def _get(url, params):
     headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"}
-    for attempt in range(5):
+    for attempt in range(8):
         resp = requests.get(url, params=params, headers=headers, timeout=30)
         if resp.status_code == 200 and "last_name" in resp.text:
             return resp.text
-        wait = 2 ** attempt
+        wait = min(2 ** attempt, 120)
         print(f"  Savant returned {resp.status_code}, retrying in {wait}s…")
         time.sleep(wait)
     resp.raise_for_status()

@@ -31,10 +31,15 @@ jobs:
           NO_AUTO_PHOTO: "1"
         run: |
           python3 mlb_graphic.py "" ba
+          sleep 45
           python3 mlb_graphic.py "" slg
+          sleep 45
           python3 mlb_graphic.py "" woba
+          sleep 45
           python3 pitching_graphic.py "" era
+          sleep 45
           python3 counting_graphic.py "" hr
+          sleep 45
           python3 mlb_graphic.py "" obp
 
       - name: Commit and push updated graphics
