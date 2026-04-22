@@ -309,12 +309,23 @@ def build(top10, output=None):
 
 PHOTOS_DIR = "/home/user/Mlb/photos"
 
-def leader_photo(name):
-    import os
+def leader_photo(name, pid=None):
+    import os, io
+    os.makedirs(PHOTOS_DIR, exist_ok=True)
     for ext in ("jpg", "jpeg", "png"):
         p = os.path.join(PHOTOS_DIR, f"{name}.{ext}")
         if os.path.exists(p):
             return p
+    if pid:
+        dest = os.path.join(PHOTOS_DIR, f"{name}.jpg")
+        try:
+            url = f"https://img.mlbstatic.com/mlb-photos/image/upload/w_1000,q_auto:best/v1/people/{pid}/headshot/67/current"
+            r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=15)
+            Image.open(io.BytesIO(r.content)).save(dest)
+            print(f"Downloaded photo for {name}")
+            return dest
+        except Exception as e:
+            print(f"Could not fetch photo for {name}: {e}")
     return None
 
 # ── Entry point ───────────────────────────────────────────────────────────────
@@ -332,10 +343,9 @@ if __name__ == "__main__":
 
     # auto-select leader photo if no photo was passed on the command line
     if not IMAGE_PATH:
-        auto = leader_photo(top10.iloc[0]["name"])
+        leader = top10.iloc[0]
+        auto = leader_photo(leader["name"], int(leader["player_id"]))
         if auto:
-            import sys as _sys
-            _sys.argv.insert(1, auto)
             globals()["IMAGE_PATH"] = auto
             print(f"Auto photo: {auto}")
 
