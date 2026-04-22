@@ -28,10 +28,10 @@ jobs:
 
       - name: Generate graphics
         run: |
-          python3 mlb_graphic.py player.jpg ba
-          python3 mlb_graphic.py slg_player.jpg slg
-          python3 mlb_graphic.py woba_player.jpg woba
-          python3 pitching_graphic.py era_player_crop.jpg era
+          python3 mlb_graphic.py "" ba
+          python3 mlb_graphic.py "" slg
+          python3 mlb_graphic.py "" woba
+          python3 pitching_graphic.py "" era
           python3 counting_graphic.py "" hr
           python3 mlb_graphic.py "" obp
 
