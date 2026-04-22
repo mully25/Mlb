@@ -1,0 +1,42 @@
+name: Daily MLB Graphics Update
+
+on:
+  schedule:
+    - cron: '0 13 * * *'  # 9am EDT (UTC-4) / runs at 10am when clocks change to EST
+  workflow_dispatch:       # allow manual trigger from GitHub UI
+
+jobs:
+  update-graphics:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install fonts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y fonts-open-sans
+
+      - name: Install Python dependencies
+        run: pip install pillow pandas numpy requests
+
+      - name: Generate graphics
+        run: |
+          python3 mlb_graphic.py player.jpg ba
+          python3 mlb_graphic.py slg_player.jpg slg
+          python3 mlb_graphic.py woba_player.jpg woba
+          python3 pitching_graphic.py era_player_crop.jpg era
+
+      - name: Commit and push updated graphics
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ba_top10.png slg_top10.png woba_top10.png era_top10.png
+          git diff --staged --quiet || git commit -m "Auto-update graphics $(date +'%-m/%-d/%y')"
+          git push
