@@ -325,16 +325,15 @@ def build(top10, output=None):
     canvas.convert("RGB").save(output, "PNG")
     print(f"Saved → {output}")
 
-PHOTOS_DIR = "/home/user/Mlb/photos"
+PHOTOS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "photos")
 
 def leader_photo(name, pid=None):
-    import os, io
     os.makedirs(PHOTOS_DIR, exist_ok=True)
     for ext in ("jpg", "jpeg", "png"):
         p = os.path.join(PHOTOS_DIR, f"{name}.{ext}")
         if os.path.exists(p):
             return p
-    if pid:
+    if pid and not os.getenv("NO_AUTO_PHOTO"):
         dest = os.path.join(PHOTOS_DIR, f"{name}.jpg")
         try:
             url = f"https://img.mlbstatic.com/mlb-photos/image/upload/w_1000,q_auto:best/v1/people/{pid}/headshot/67/current"
@@ -360,7 +359,7 @@ if __name__ == "__main__":
     top10["team"] = teams
 
     # auto-select leader photo if no photo was passed on the command line
-    if not IMAGE_PATH and not __import__("os").getenv("NO_AUTO_PHOTO"):
+    if not IMAGE_PATH:
         leader = top10.iloc[0]
         auto = leader_photo(leader["name"], int(leader["player_id"]))
         if auto:
