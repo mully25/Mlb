@@ -275,7 +275,7 @@ def build(top10, output=None):
     y += th(d, "TOP 10", f_big) + 4
 
     f_sub = font("OpenSans-Bold.ttf", 38)
-    put(d, STAT["title"], ML, y, f_sub, LIGHT)
+    put(d, STAT["title"], ML, y, f_sub, WHITE)
     y += th(d, "x", f_sub) + 14
 
     d.rectangle([ML, y, ML + 520, y + 3], fill=(*ACCENT_RED, 255))
