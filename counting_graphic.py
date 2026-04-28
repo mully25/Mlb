@@ -79,7 +79,7 @@ TEAM_COLORS = {
     "Detroit Tigers":         (245,  70,  22),
     "Los Angeles Angels":     (186,   0,  33),
     "Los Angeles Dodgers":    ( 28, 108, 220),
-    "New York Yankees":       ( 62, 116, 196),
+    "New York Yankees":       ( 12,  35,  64),
     "Seattle Mariners":       (  0, 145, 135),
     "Washington Nationals":   (171,   0,   3),
     "Milwaukee Brewers":      (198, 162,  48),
