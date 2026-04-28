@@ -226,7 +226,7 @@ def build(top10, output=None):
 
     f_lbl = font("OpenSans-Semibold.ttf", 24)
     today = date.today().strftime("%-m/%-d/%y")
-    put(d, f"Baseball Savant  ·  Qualified AB  ·  As of {today}", ML, y, f_lbl, DIM)
+    put(d, f"Baseball Savant  ·  Qualified PA  ·  As of {today}", ML, y, f_lbl, DIM)
     y += th(d, "x", f_lbl) + 36
 
     # ── player rows ───────────────────────────────────────────────────────
@@ -326,7 +326,7 @@ def build(top10, output=None):
     d.rectangle([0, fy, W, H], fill=(*PANEL, 255))
     d.rectangle([0, fy, W, fy + 2], fill=(*ACCENT_RED, 255))
     f_foot = font("OpenSans-Regular.ttf", 21)
-    foot   = f"Data: baseballsavant.mlb.com  ·  {STAT['footer']}  ·  Qualified AB"
+    foot   = f"Data: baseballsavant.mlb.com  ·  {STAT['footer']}  ·  Qualified PA"
     put(d, foot, ML, fy + (FOOTER_H - th(d, "x", f_foot)) // 2, f_foot, DIM)
 
     canvas.convert("RGB").save(output, "PNG")
