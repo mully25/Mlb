@@ -194,7 +194,7 @@ def fetch_team(pid, ptype):
 # ── Graphic builder ───────────────────────────────────────────────────────────
 def build(top10, output=None):
     if output is None:
-        output = f"/home/user/Mlb/{STAT_KEY}_top10.png"
+        output = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"{STAT_KEY}_top10.png")
 
     canvas = Image.new("RGBA", (W, H), (*BG, 255))
 

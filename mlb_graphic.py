@@ -221,7 +221,7 @@ def fetch_team(pid):
 # ── Graphic builder ───────────────────────────────────────────────────────────
 def build(top10, output=None):
     if output is None:
-        output = f"/home/user/Mlb/{STAT_KEY}_top10.png"
+        output = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"{STAT_KEY}_top10.png")
 
     HAS_SEC  = bool(STAT.get("secondary") and "sec_val" in top10.columns)
     HAS_DIFF = bool(STAT.get("diff_col") and "diff_val" in top10.columns)
