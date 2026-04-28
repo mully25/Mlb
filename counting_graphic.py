@@ -231,7 +231,7 @@ def build(top10, output=None):
     f_lbl = font("OpenSans-Semibold.ttf", 24)
     today = date.today().strftime("%-m/%-d/%y")
     qualifier = "Qualified SP" if STAT["player_type"] == "pitcher" else "Qualified PA"
-    put(d, f"2026 MLB Season  ·  {qualifier}  ·  As of {today}", ML, y, f_lbl, DIM)
+    put(d, f"Baseball Savant  ·  {qualifier}  ·  As of {today}", ML, y, f_lbl, DIM)
     y += th(d, "x", f_lbl) + 36
 
     # ── player rows ───────────────────────────────────────────────────────
