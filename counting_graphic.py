@@ -47,7 +47,7 @@ STAT_CONFIG = {
 }
 
 # selections to request per player type
-BATTER_SELS  = "home_run,b_rbi,b_stolen_base,b_runs_scored,xbh,strikeout,b_war"
+BATTER_SELS  = "home_run,b_rbi,b_stolen_base,b_runs_scored,xbh,strikeout,b_war,pa"
 PITCHER_SELS = "p_win,p_strikeout,p_era,whip,p_fip,p_war"
 
 # ── CLI args ──────────────────────────────────────────────────────────────────
@@ -144,12 +144,25 @@ def _get(url, params):
         time.sleep(wait)
     resp.raise_for_status()
 
+def get_season_games():
+    try:
+        r = requests.get(
+            "https://statsapi.mlb.com/api/v1/standings",
+            params={"leagueId": "103,104", "season": "2026"},
+            headers={"User-Agent": "Mozilla/5.0"}, timeout=10)
+        gp = [t.get("gamesPlayed", 0)
+              for div in r.json().get("records", [])
+              for t in div.get("teamRecords", [])]
+        return max(gp) if gp else 162
+    except Exception:
+        return 162
+
 def fetch_top10():
     ptype = STAT["player_type"]
     sels  = BATTER_SELS if ptype == "batter" else PITCHER_SELS
     col   = STAT["col"]
     text  = _get("https://baseballsavant.mlb.com/leaderboard/custom",
-                 {"year":"2026","type":ptype,"filter":"","min":"q",
+                 {"year":"2026","type":ptype,"filter":"","min":"1",
                   "selections":sels,"chart":"false",
                   "x":col,"y":col,"r":"no","chartType":"bbs","csv":"true"})
     df = pd.read_csv(io.StringIO(text.lstrip('﻿')))
@@ -160,6 +173,11 @@ def fetch_top10():
     df["name"]  = df["first"] + " " + df["last"]
     df["val"]   = pd.to_numeric(df[col].astype(str).str.strip(), errors="coerce")
     df = df.dropna(subset=["val"])
+    if ptype == "batter":
+        games  = get_season_games()
+        min_pa = int(3.1 * games)
+        df["pa"] = pd.to_numeric(df["pa"], errors="coerce")
+        df = df[df["pa"] >= min_pa]
     if STAT["rank"] == "largest":
         top10 = df.nlargest(10, "val").reset_index(drop=True)
     else:
