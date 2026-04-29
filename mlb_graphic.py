@@ -262,8 +262,6 @@ def build(top10, output=None):
 
     d = ImageDraw.Draw(canvas)
 
-    # top stripe
-    d.rectangle([0, 0, W, 7], fill=(*ACCENT_RED, 255))
 
     # ── header ────────────────────────────────────────────────────────────
     ML = 54
@@ -287,7 +285,7 @@ def build(top10, output=None):
     y += th(d, "x", f_lbl) + 36
 
     # ── player rows ───────────────────────────────────────────────────────
-    FOOTER_H = 52
+    FOOTER_H = 0
     ROW_H    = (H - y - FOOTER_H - 10) // 10
     PILL_R   = 14
     PAD_X    = 16
@@ -396,14 +394,6 @@ def build(top10, output=None):
             sv  = STAT["fmt"](val)
             sh2 = th(d, sv, f_stat)
             put(d, sv, sx, mid_y - sh2 // 2, f_stat, WHITE)
-
-    # ── footer ────────────────────────────────────────────────────────────
-    fy = H - FOOTER_H
-    d.rectangle([0, fy, W, H], fill=(*PANEL, 255))
-    d.rectangle([0, fy, W, fy + 2], fill=(*ACCENT_RED, 255))
-    f_foot = font("OpenSans-Regular.ttf", 21)
-    foot   = f"Data: baseballsavant.mlb.com  ·  {STAT['footer']}  ·  Qualified PA"
-    put(d, foot, ML, fy + (FOOTER_H - th(d, "x", f_foot)) // 2, f_foot, DIM)
 
     canvas.convert("RGB").save(output, "PNG")
     print(f"Saved → {output}")
