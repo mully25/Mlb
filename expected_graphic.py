@@ -200,14 +200,15 @@ def build(top10, output=None):
         pw, ph = photo.size
         right_x = 600
         right_w = W - right_x
-        scale   = min(right_w / pw, H / ph)
+        scale   = max(right_w / pw, H / ph)
         new_w   = int(pw * scale)
         new_h   = int(ph * scale)
         photo   = photo.resize((new_w, new_h), Image.LANCZOS)
         photo   = ImageEnhance.Brightness(photo).enhance(0.95)
-        x = right_x + (right_w - new_w) // 2
-        y = (H - new_h) // 2
-        canvas.paste(photo.convert("RGBA"), (x, y))
+        cx = (new_w - right_w) // 2
+        cy = (new_h - H) // 2
+        photo = photo.crop((cx, cy, cx + right_w, cy + H))
+        canvas.paste(photo.convert("RGBA"), (right_x, 0))
 
     grad = side_gradient(W, H, BG, solid_until=0.42, fade_end=0.72)
     canvas.paste(grad, (0, 0), grad)
