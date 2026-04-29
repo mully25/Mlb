@@ -46,6 +46,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add ba_top10.png slg_top10.png woba_top10.png era_top10.png hr_top10.png obp_top10.png
+          cp ba_top10.png slg_top10.png woba_top10.png obp_top10.png hitting/
+          git add ba_top10.png slg_top10.png woba_top10.png era_top10.png hr_top10.png obp_top10.png hitting/
           git diff --staged --quiet || git commit -m "Auto-update graphics $(date +'%-m/%-d/%y')"
           git push
