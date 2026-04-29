@@ -139,15 +139,17 @@ def build(top10, output=None):
     if IMAGE_PATH:
         photo = Image.open(IMAGE_PATH).convert("RGB")
         pw, ph = photo.size
-        # scale so height = canvas height
-        scale = H / ph
-        new_w = int(pw * scale)
-        photo = photo.resize((new_w, H), Image.LANCZOS)
-        # darken slightly
-        photo = ImageEnhance.Brightness(photo).enhance(0.80)
-        # paste flush to right edge
-        paste_x = W - new_w
-        canvas.paste(photo.convert("RGBA"), (paste_x, 0))
+        right_x = 600
+        right_w = W - right_x
+        scale   = max(right_w / pw, H / ph)
+        new_w   = int(pw * scale)
+        new_h   = int(ph * scale)
+        photo   = photo.resize((new_w, new_h), Image.LANCZOS)
+        photo   = ImageEnhance.Brightness(photo).enhance(0.80)
+        cx = (new_w - right_w) // 2
+        cy = (new_h - H) // 2
+        photo = photo.crop((cx, cy, cx + right_w, cy + H))
+        canvas.paste(photo.convert("RGBA"), (right_x, 0))
 
     # ── dark gradient overlay (left panel) ───────────────────────────────
     grad = side_gradient(W, H, BG, solid_until=0.50, fade_end=0.88)
