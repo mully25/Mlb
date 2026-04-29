@@ -307,12 +307,21 @@ def build(top10, output=None):
 
 PHOTOS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "photos")
 
+def _normalize(s):
+    import unicodedata
+    return unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower()
+
 def leader_photo(name, pid=None):
     os.makedirs(PHOTOS_DIR, exist_ok=True)
-    for ext in ("jpg", "jpeg", "png"):
+    for ext in ("jpg", "jpeg", "png", "webp"):
         p = os.path.join(PHOTOS_DIR, f"{name}.{ext}")
         if os.path.exists(p):
             return p
+    norm_name = _normalize(name)
+    for fname in os.listdir(PHOTOS_DIR):
+        stem, dot, fext = fname.rpartition(".")
+        if fext.lower() in ("jpg", "jpeg", "png", "webp") and _normalize(stem) == norm_name:
+            return os.path.join(PHOTOS_DIR, fname)
     if pid and not os.getenv("NO_AUTO_PHOTO"):
         dest = os.path.join(PHOTOS_DIR, f"{name}.jpg")
         try:
