@@ -29,26 +29,27 @@ from zoneinfo import ZoneInfo
 def _int(v):   return str(int(round(v)))
 def _f2(v):    return f"{v:.2f}"
 def _f1(v):    return f"{v:.1f}"
+def _avg(v):   return f"{v:.3f}" if v >= 1 else f".{int(round(v * 1000)):03d}"
 
 STAT_CONFIG = {
-    # ── batters ──
-    "hr":   {"col":"home_run",      "player_type":"batter",  "rank":"largest",  "title":"HOME RUN LEADERS",       "footer":"Home Runs",            "fmt":_int},
-    "rbi":  {"col":"b_rbi",         "player_type":"batter",  "rank":"largest",  "title":"RBI LEADERS",            "footer":"RBIs",                  "fmt":_int},
-    "sb":   {"col":"b_stolen_base", "player_type":"batter",  "rank":"largest",  "title":"STOLEN BASE LEADERS",    "footer":"Stolen Bases",          "fmt":_int},
-    "r":    {"col":"b_runs_scored", "player_type":"batter",  "rank":"largest",  "title":"RUNS LEADERS",           "footer":"Runs Scored",           "fmt":_int},
-    "xbh":  {"col":"xbh",           "player_type":"batter",  "rank":"largest",  "title":"EXTRA BASE HIT LEADERS", "footer":"Extra Base Hits",       "fmt":_int},
-    "kbat": {"col":"strikeout",     "player_type":"batter",  "rank":"largest",  "title":"STRIKEOUT LEADERS",      "footer":"Strikeouts (Batters)",  "fmt":_int},
-    "war":  {"col":"b_war",         "player_type":"batter",  "rank":"largest",  "title":"WAR LEADERS",            "footer":"WAR (Batters)",         "fmt":_f1},
-    # ── pitchers ──
-    "k":    {"col":"p_strikeout",   "player_type":"pitcher", "rank":"largest",  "title":"STRIKEOUT LEADERS",      "footer":"Pitcher Strikeouts",    "fmt":_int},
-    "w":    {"col":"p_win",         "player_type":"pitcher", "rank":"largest",  "title":"WIN LEADERS",            "footer":"Pitcher Wins",          "fmt":_int},
-    "fip":  {"col":"p_fip",         "player_type":"pitcher", "rank":"smallest", "title":"FIP LEADERS",            "footer":"FIP (lower = better)",  "fmt":_f2},
-    "whip": {"col":"whip",          "player_type":"pitcher", "rank":"smallest", "title":"WHIP LEADERS",           "footer":"WHIP (lower = better)", "fmt":_f2},
-    "warp": {"col":"p_war",         "player_type":"pitcher", "rank":"largest",  "title":"WAR LEADERS",            "footer":"WAR (Pitchers)",        "fmt":_f1},
+    # ── batters (MLB Stats API) ──
+    "hr":   {"src":"mlb", "col":"homeRuns",       "player_type":"batter",  "rank":"largest",  "title":"HOME RUN LEADERS",    "fmt":_int},
+    "rbi":  {"src":"mlb", "col":"rbi",            "player_type":"batter",  "rank":"largest",  "title":"RBI LEADERS",         "fmt":_int},
+    "hits": {"src":"mlb", "col":"hits",           "player_type":"batter",  "rank":"largest",  "title":"HIT LEADERS",         "fmt":_int},
+    "sb":   {"src":"mlb", "col":"stolenBases",    "player_type":"batter",  "rank":"largest",  "title":"STOLEN BASE LEADERS", "fmt":_int},
+    "r":    {"src":"mlb", "col":"runs",           "player_type":"batter",  "rank":"largest",  "title":"RUNS LEADERS",        "fmt":_int},
+    "ops":  {"src":"mlb", "col":"ops",            "player_type":"batter",  "rank":"largest",  "title":"OPS LEADERS",         "fmt":_avg},
+    # ── batters (Savant) ──
+    "xbh":  {"src":"savant","col":"xbh",          "player_type":"batter",  "rank":"largest",  "title":"EXTRA BASE HIT LEADERS","fmt":_int},
+    "kbat": {"src":"savant","col":"strikeout",    "player_type":"batter",  "rank":"largest",  "title":"STRIKEOUT LEADERS",   "fmt":_int},
+    # ── pitchers (Savant) ──
+    "k":    {"src":"savant","col":"p_strikeout",  "player_type":"pitcher", "rank":"largest",  "title":"STRIKEOUT LEADERS",   "fmt":_int},
+    "w":    {"src":"savant","col":"p_win",        "player_type":"pitcher", "rank":"largest",  "title":"WIN LEADERS",         "fmt":_int},
+    "fip":  {"src":"savant","col":"p_fip",        "player_type":"pitcher", "rank":"smallest", "title":"FIP LEADERS",         "fmt":_f2},
+    "whip": {"src":"savant","col":"whip",         "player_type":"pitcher", "rank":"smallest", "title":"WHIP LEADERS",        "fmt":_f2},
 }
 
-# selections to request per player type
-BATTER_SELS  = "home_run,b_rbi,b_stolen_base,b_runs_scored,xbh,strikeout,b_war,pa"
+BATTER_SELS  = "home_run,b_rbi,xbh,strikeout,pa"
 PITCHER_SELS = "p_win,p_strikeout,p_era,whip,p_fip,p_war"
 
 # ── CLI args ──────────────────────────────────────────────────────────────────
@@ -160,25 +161,53 @@ def get_season_games():
 
 def fetch_top10():
     ptype = STAT["player_type"]
-    sels  = BATTER_SELS if ptype == "batter" else PITCHER_SELS
     col   = STAT["col"]
-    text  = _get("https://baseballsavant.mlb.com/leaderboard/custom",
-                 {"year":"2026","type":ptype,"filter":"","min":"1",
-                  "selections":sels,"chart":"false",
-                  "x":col,"y":col,"r":"no","chartType":"bbs","csv":"true"})
-    df = pd.read_csv(io.StringIO(text.lstrip('﻿')))
-    df.columns = df.columns.str.strip()
-    nc = df.columns[0]
-    df["last"]  = df[nc].str.split(", ").str[0].str.strip()
-    df["first"] = df[nc].str.split(", ").str[1].str.strip()
-    df["name"]  = df["first"] + " " + df["last"]
-    df["val"]   = pd.to_numeric(df[col].astype(str).str.strip(), errors="coerce")
-    df = df.dropna(subset=["val"])
-    if ptype == "batter":
+
+    if STAT["src"] == "mlb":
         games  = get_season_games()
         min_pa = int(3.1 * games)
-        df["pa"] = pd.to_numeric(df["pa"], errors="coerce")
-        df = df[df["pa"] >= min_pa]
+        group  = "hitting" if ptype == "batter" else "pitching"
+        r = requests.get("https://statsapi.mlb.com/api/v1/stats",
+                         params={"stats":"season","group":group,"season":"2026",
+                                 "sportId":1,"limit":500,"sortStat":col,"order":"desc"},
+                         headers={"User-Agent":"Mozilla/5.0"}, timeout=20)
+        rows = []
+        for s in r.json()["stats"][0]["splits"]:
+            pa  = s["stat"].get("plateAppearances", 0)
+            val = s["stat"].get(col)
+            if val is None or pa < min_pa:
+                continue
+            rows.append({
+                "name":      s["player"]["fullName"],
+                "player_id": s["player"]["id"],
+                "team":      s["team"]["name"],
+                "val":       float(val),
+            })
+        df = pd.DataFrame(rows)
+        if df.empty:
+            raise RuntimeError(f"No qualified data for {col}")
+    else:
+        sels = BATTER_SELS if ptype == "batter" else PITCHER_SELS
+        text = _get("https://baseballsavant.mlb.com/leaderboard/custom",
+                    {"year":"2026","type":ptype,"filter":"","min":"1",
+                     "selections":sels,"chart":"false",
+                     "x":col,"y":col,"r":"no","chartType":"bbs","csv":"true"})
+        df = pd.read_csv(io.StringIO(text.lstrip('﻿')))
+        df.columns = df.columns.str.strip()
+        nc = df.columns[0]
+        df["last"]  = df[nc].str.split(", ").str[0].str.strip()
+        df["first"] = df[nc].str.split(", ").str[1].str.strip()
+        df["name"]  = df["first"] + " " + df["last"]
+        df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce")
+        df = df.dropna(subset=["player_id"])
+        df["val"] = pd.to_numeric(df[col].astype(str).str.strip(), errors="coerce")
+        df = df.dropna(subset=["val"])
+        if ptype == "batter":
+            games  = get_season_games()
+            min_pa = int(3.1 * games)
+            df["pa"] = pd.to_numeric(df["pa"], errors="coerce")
+            df = df[df["pa"] >= min_pa]
+
     if STAT["rank"] == "largest":
         top10 = df.nlargest(10, "val").reset_index(drop=True)
     else:
@@ -343,13 +372,17 @@ if __name__ == "__main__":
     print(f"Fetching {STAT['title']}…")
     top10 = fetch_top10()
 
-    print("Fetching team data…")
-    teams = []
-    for _, row in top10.iterrows():
-        team = fetch_team(int(row["player_id"]), STAT["player_type"])
-        teams.append(team)
-        print(f"  {row['name']:<25} → {team}")
-    top10["team"] = teams
+    if "team" not in top10.columns:
+        print("Fetching team data…")
+        teams = []
+        for _, row in top10.iterrows():
+            team = fetch_team(int(row["player_id"]), STAT["player_type"])
+            teams.append(team)
+            print(f"  {row['name']:<25} → {team}")
+        top10["team"] = teams
+    else:
+        for _, row in top10.iterrows():
+            print(f"  {row['name']:<25} → {row['team']}")
 
     # auto-select leader photo if no photo was passed on the command line
     if not IMAGE_PATH:

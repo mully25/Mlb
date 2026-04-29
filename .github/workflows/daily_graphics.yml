@@ -40,13 +40,23 @@ jobs:
           sleep 45
           python3 counting_graphic.py "" hr
           sleep 45
+          python3 counting_graphic.py "" rbi
+          sleep 45
+          python3 counting_graphic.py "" hits
+          sleep 45
+          python3 counting_graphic.py "" sb
+          sleep 45
+          python3 counting_graphic.py "" r
+          sleep 45
+          python3 counting_graphic.py "" ops
+          sleep 45
           python3 mlb_graphic.py "" obp
 
       - name: Commit and push updated graphics
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          cp ba_top10.png slg_top10.png woba_top10.png obp_top10.png hitting/
-          git add ba_top10.png slg_top10.png woba_top10.png era_top10.png hr_top10.png obp_top10.png hitting/
+          cp ba_top10.png slg_top10.png woba_top10.png obp_top10.png hr_top10.png rbi_top10.png hits_top10.png sb_top10.png r_top10.png ops_top10.png hitting/
+          git add ba_top10.png slg_top10.png woba_top10.png era_top10.png hr_top10.png rbi_top10.png hits_top10.png sb_top10.png r_top10.png ops_top10.png obp_top10.png hitting/
           git diff --staged --quiet || git commit -m "Auto-update graphics $(date +'%-m/%-d/%y')"
           git push
