@@ -283,7 +283,7 @@ def build(top10, output=None):
 
     f_lbl = font("OpenSans-Semibold.ttf", 24)
     today = date.today().strftime("%-m/%-d/%y")
-    put(d, f"Baseball Savant  ·  Qualified PA  ·  As of {today}", ML, y, f_lbl, DIM)
+    put(d, f"2026 MLB Season  ·  Qualified PA  ·  As of {today}", ML, y, f_lbl, DIM)
     y += th(d, "x", f_lbl) + 36
 
     # ── player rows ───────────────────────────────────────────────────────
