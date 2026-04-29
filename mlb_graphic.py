@@ -13,7 +13,8 @@ Stat options:
 """
 import sys, io, os, time, requests, pandas as pd, numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
-from datetime import date
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
 
 # ── Stat config ───────────────────────────────────────────────────────────────
 #  col       – primary sort/display column
@@ -280,7 +281,7 @@ def build(top10, output=None):
     y += 16
 
     f_lbl = font("OpenSans-Semibold.ttf", 24)
-    today = date.today().strftime("%-m/%-d/%y")
+    today = datetime.now(ZoneInfo("America/New_York")).strftime("%-m/%-d/%y")
     put(d, f"2026 MLB Season  ·  Qualified PA  ·  As of {today}", ML, y, f_lbl, DIM)
     y += th(d, "x", f_lbl) + 36
 

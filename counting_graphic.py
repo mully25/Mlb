@@ -22,7 +22,8 @@ Usage: python3 counting_graphic.py [photo.jpg] [stat]
 """
 import sys, io, os, time, requests, pandas as pd, numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
-from datetime import date
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
 
 # ── Stat config ───────────────────────────────────────────────────────────────
 def _int(v):   return str(int(round(v)))
@@ -246,7 +247,7 @@ def build(top10, output=None):
     y += 16
 
     f_lbl = font("OpenSans-Semibold.ttf", 24)
-    today = date.today().strftime("%-m/%-d/%y")
+    today = datetime.now(ZoneInfo("America/New_York")).strftime("%-m/%-d/%y")
     qualifier = "Qualified SP" if STAT["player_type"] == "pitcher" else "Qualified PA"
     put(d, f"2026 MLB Season  ·  {qualifier}  ·  As of {today}", ML, y, f_lbl, DIM)
     y += th(d, "x", f_lbl) + 36
