@@ -248,16 +248,20 @@ def build(top10, output=None):
 
     canvas = Image.new("RGBA", (W, H), (*BG, 255))
 
-    # photo on right
+    # photo on right — fit whole player in right portion of canvas
     if IMAGE_PATH:
         photo = Image.open(IMAGE_PATH).convert("RGB")
         pw, ph = photo.size
-        scale  = max(W / pw, H / ph)
-        new_w  = int(pw * scale)
-        new_h  = int(ph * scale)
-        photo  = photo.resize((new_w, new_h), Image.LANCZOS)
-        photo  = ImageEnhance.Brightness(photo).enhance(0.95)
-        canvas.paste(photo.convert("RGBA"), ((W - new_w) // 2, (H - new_h) // 2))
+        right_x = 600                          # text ends around x=574-648
+        right_w = W - right_x                  # 480px available
+        scale   = min(right_w / pw, H / ph)   # fit (never crop)
+        new_w   = int(pw * scale)
+        new_h   = int(ph * scale)
+        photo   = photo.resize((new_w, new_h), Image.LANCZOS)
+        photo   = ImageEnhance.Brightness(photo).enhance(0.95)
+        x = right_x + (right_w - new_w) // 2  # center in right area
+        y = (H - new_h) // 2                   # center vertically
+        canvas.paste(photo.convert("RGBA"), (x, y))
 
     # gradient overlay
     grad = side_gradient(W, H, BG, solid_until=0.42, fade_end=0.72)
