@@ -201,7 +201,7 @@ def build(top10, output=None):
         new_w  = int(pw * H / ph)
         photo  = photo.resize((new_w, H), Image.LANCZOS)
         photo  = ImageEnhance.Brightness(photo).enhance(0.95)
-        canvas.paste(photo.convert("RGBA"), (W - new_w + 150, 0))
+        canvas.paste(photo.convert("RGBA"), ((W - new_w) // 2, 0))
 
     grad = side_gradient(W, H, BG, solid_until=0.42, fade_end=0.72)
     canvas.paste(grad, (0, 0), grad)
