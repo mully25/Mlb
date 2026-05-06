@@ -249,7 +249,7 @@ def build(top10, output=None):
     if IMAGE_PATH:
         photo = Image.open(IMAGE_PATH).convert("RGB")
         pw, ph = photo.size
-        scale = max(W / pw, H / ph) * 0.85
+        scale = max(max(W / pw, H / ph) * 0.85, H / ph)
         new_w = math.ceil(pw * scale)
         new_h = math.ceil(ph * scale)
         photo = photo.resize((new_w, new_h), Image.LANCZOS)
