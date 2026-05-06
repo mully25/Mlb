@@ -249,14 +249,21 @@ def build(top10, output=None):
     if IMAGE_PATH:
         photo = Image.open(IMAGE_PATH).convert("RGB")
         pw, ph = photo.size
-        scale = max(W / pw, H / ph)
+        scale = max(W / pw, H / ph) * 0.85
         new_w = math.ceil(pw * scale)
         new_h = math.ceil(ph * scale)
         photo = photo.resize((new_w, new_h), Image.LANCZOS)
-        cx = (new_w - W) // 2
-        cy = (new_h - H) // 2
-        photo = photo.crop((cx, cy, cx + W, cy + H))
-        canvas.paste(photo.convert("RGBA"), (0, 0))
+        if new_h > H:
+            cy = (new_h - H) // 2
+            photo = photo.crop((0, cy, new_w, cy + H))
+            new_h = H
+        if new_w > W:
+            cx = (new_w - W) // 2
+            photo = photo.crop((cx, 0, cx + W, new_h))
+            new_w = W
+        paste_x = W - new_w
+        paste_y = (H - new_h) // 2
+        canvas.paste(photo.convert("RGBA"), (paste_x, paste_y))
 
     grad = side_gradient(W, H, BG, solid_until=0.42, fade_end=0.65)
     canvas.paste(grad, (0, 0), grad)
