@@ -261,7 +261,7 @@ def build(top10, output=None):
         canvas.paste(photo.convert("RGBA"), (0, 0))
 
     # gradient overlay
-    grad = side_gradient(W, H, BG, solid_until=0.52, fade_end=0.64)
+    grad = side_gradient(W, H, BG, solid_until=0.42, fade_end=0.65)
     canvas.paste(grad, (0, 0), grad)
 
     d = ImageDraw.Draw(canvas)
