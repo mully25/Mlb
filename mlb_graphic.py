@@ -11,7 +11,7 @@ Stat options:
   slg     Slugging Percentage
   woba    Weighted On-Base Average
 """
-import sys, io, os, time, requests, pandas as pd, numpy as np
+import sys, io, os, time, math, requests, pandas as pd, numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
@@ -248,23 +248,21 @@ def build(top10, output=None):
 
     canvas = Image.new("RGBA", (W, H), (*BG, 255))
 
-    # photo on right — fit whole player in right portion of canvas
     if IMAGE_PATH:
         photo = Image.open(IMAGE_PATH).convert("RGB")
         pw, ph = photo.size
-        right_x = 600                          # text ends around x=574-648
-        right_w = W - right_x                  # 480px available
-        scale   = min(right_w / pw, H / ph)   # fit (never crop)
-        new_w   = int(pw * scale)
-        new_h   = int(ph * scale)
-        photo   = photo.resize((new_w, new_h), Image.LANCZOS)
-        photo   = ImageEnhance.Brightness(photo).enhance(0.95)
-        x = right_x + (right_w - new_w) // 2  # center in right area
-        y = (H - new_h) // 2                   # center vertically
-        canvas.paste(photo.convert("RGBA"), (x, y))
+        scale = max(W / pw, H / ph)
+        new_w = math.ceil(pw * scale)
+        new_h = math.ceil(ph * scale)
+        photo = photo.resize((new_w, new_h), Image.LANCZOS)
+        photo = ImageEnhance.Brightness(photo).enhance(0.80)
+        cx = (new_w - W) // 2
+        cy = (new_h - H) // 2
+        photo = photo.crop((cx, cy, cx + W, cy + H))
+        canvas.paste(photo.convert("RGBA"), (0, 0))
 
     # gradient overlay
-    grad = side_gradient(W, H, BG, solid_until=0.42, fade_end=0.72)
+    grad = side_gradient(W, H, BG, solid_until=0.38, fade_end=0.78)
     canvas.paste(grad, (0, 0), grad)
 
     d = ImageDraw.Draw(canvas)
