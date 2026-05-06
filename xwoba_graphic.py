@@ -151,7 +151,7 @@ def build(top10, output=None):
         canvas.paste(photo.convert("RGBA"), (0, 0))
 
     # ── dark gradient overlay (left panel) ───────────────────────────────
-    grad = side_gradient(W, H, BG, solid_until=0.50, fade_end=0.88)
+    grad = side_gradient(W, H, BG, solid_until=0.52, fade_end=0.60)
     canvas.paste(grad, (0, 0), grad)
 
     d = ImageDraw.Draw(canvas)

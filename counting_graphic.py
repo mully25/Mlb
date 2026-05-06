@@ -259,7 +259,7 @@ def build(top10, output=None):
         photo = photo.crop((cx, cy, cx + W, cy + H))
         canvas.paste(photo.convert("RGBA"), (0, 0))
 
-    grad = side_gradient(W, H, BG)
+    grad = side_gradient(W, H, BG, solid_until=0.52, fade_end=0.60)
     canvas.paste(grad, (0, 0), grad)
 
     d = ImageDraw.Draw(canvas)
