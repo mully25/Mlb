@@ -255,14 +255,13 @@ def build(top10, output=None):
         new_w = math.ceil(pw * scale)
         new_h = math.ceil(ph * scale)
         photo = photo.resize((new_w, new_h), Image.LANCZOS)
-        photo = ImageEnhance.Brightness(photo).enhance(0.80)
         cx = (new_w - W) // 2
         cy = (new_h - H) // 2
         photo = photo.crop((cx, cy, cx + W, cy + H))
         canvas.paste(photo.convert("RGBA"), (0, 0))
 
     # gradient overlay
-    grad = side_gradient(W, H, BG, solid_until=0.38, fade_end=0.78)
+    grad = side_gradient(W, H, BG, solid_until=0.35, fade_end=0.55)
     canvas.paste(grad, (0, 0), grad)
 
     d = ImageDraw.Draw(canvas)
