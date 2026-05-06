@@ -294,7 +294,7 @@ def build(top10, output=None):
 
     f_lbl = font("OpenSans-Semibold.ttf", 24)
     today = datetime.now(ZoneInfo("America/New_York")).strftime("%-m/%-d/%y")
-    put(d, f"2026 MLB Season  ·  Qualified PA  ·  As of {today}", ML, y, f_lbl, DIM)
+    put(d, f"2026 MLB Season  ·  Qualified PA  ·  As of {today}", ML, y, f_lbl, WHITE)
     y += th(d, "x", f_lbl) + 36
 
     # ── player rows ───────────────────────────────────────────────────────
@@ -328,13 +328,9 @@ def build(top10, output=None):
         row_bot = row_top + ROW_H
         mid_y   = (row_top + row_bot) // 2
 
-        if i > 0:
-            d.line([(ML, row_top), (int(W * 0.60), row_top)],
-                   fill=(28, 34, 46, 200), width=1)
-
         # rank badge
         rank_str   = f"#{rank}"
-        rank_color = (245, 200, 24) if rank == 1 else ACCENT_RED if rank <= 3 else DIM
+        rank_color = WHITE
         rw = tw(d, rank_str, f_rank)
         rh = th(d, rank_str, f_rank)
         put(d, rank_str, ML + (RANK_COL_W - rw) // 2, mid_y - rh // 2, f_rank, rank_color)
