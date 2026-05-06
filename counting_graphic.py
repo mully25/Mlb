@@ -254,7 +254,11 @@ def build(top10, output=None):
         new_h = math.ceil(ph * scale)
         photo = photo.resize((new_w, new_h), Image.LANCZOS)
         if new_h > H:
-            cy = (new_h - H) // 2
+            arr = np.array(photo)
+            brightness = arr.mean(axis=(1, 2))
+            rows = np.where(brightness > 10)[0]
+            first_row = int(rows[0]) if len(rows) else 0
+            cy = max(0, min(first_row, new_h - H))
             photo = photo.crop((0, cy, new_w, cy + H))
             new_h = H
         if new_w > W:
