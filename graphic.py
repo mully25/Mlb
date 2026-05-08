@@ -77,7 +77,7 @@ TEAM_COLORS = {
     "Miami Marlins":         (  0, 163, 224),
     "Milwaukee Brewers":     ( 18,  40,  75),
     "Minnesota Twins":       (  0,  43,  92),
-    "New York Mets":         (  0,  45, 114),
+    "New York Mets":         (255,  92,   0),
     "New York Yankees":      ( 12,  35,  64),
     "Athletics":             (  0,  56,  49),
     "Philadelphia Phillies": (232,  24,  40),
