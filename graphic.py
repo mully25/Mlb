@@ -187,26 +187,22 @@ def build(players, output=None):
 
     # ── Header ─────────────────────────────────────────────────────────────────
     ML = 44
-    y  = 26
+    y  = 30
 
-    f_top  = font("OpenSans-ExtraBold.ttf", 88)
-    f_sub  = font("OpenSans-Bold.ttf", 34)
-    f_date = font("OpenSans-Semibold.ttf", 20)
+    f_title = font("OpenSans-ExtraBold.ttf", 72)
+    f_date  = font("OpenSans-Semibold.ttf", 28)
 
-    top_w = int(d.textlength("TOP ", font=f_top))
-    put(d, "TOP ", ML, y, f_top, WHITE)
-    put(d, "10",   ML + top_w, y, f_top, RED)
-    y += 86
+    put(d, "BATTING AVERAGE LEADERS", ML, y, f_title, WHITE)
+    y += int(d.textlength("X", font=f_title)) + 10  # use height proxy
 
-    put(d, "BATTING AVERAGE LEADERS", ML, y, f_sub, WHITE)
-    y += 40
+    # measure actual text height
+    bbox = f_title.getbbox("BATTING AVERAGE LEADERS")
+    y = 30 + (bbox[3] - bbox[1]) + 12
 
-    d.rectangle([ML, y, ML + 580, y + 3], fill=(*RED, 255))
-    y += 13
-
-    today = datetime.now(ZoneInfo("America/New_York")).strftime("%-m/%-d/%y")
-    put(d, f"2026 MLB Season  ·  Qualified PA  ·  As of {today}", ML, y, f_date, DIM)
-    y += 32
+    today = datetime.now(ZoneInfo("America/New_York")).strftime("%B %-d, %Y")
+    put(d, today, ML, y, f_date, RED)
+    bbox2 = f_date.getbbox(today)
+    y += (bbox2[3] - bbox2[1]) + 20
 
     # ── Player rows ─────────────────────────────────────────────────────────────
     ROW_H   = (H - y - 6) // 10
