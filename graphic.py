@@ -241,9 +241,10 @@ def _parse_ip(ip_str):
         return 0.0
 
 def _fetch_fip_top10(games):
-    """Compute FIP from bdfed pitching data: FIP = (13*HR + 3*(BB+HBP) - 2*SO) / IP + 3.10"""
-    FIP_CONST = 3.10
-    min_ip = games * 1.0
+    """Compute FIP and xFIP from bdfed pitching data."""
+    FIP_CONST  = 3.10
+    LG_HR_FB   = 0.104   # league-average HR/FB rate for xFIP
+    min_ip = games - 1   # 1-game grace period so borderline starters qualify
     meta = _bdfed_meta("pitching", limit=500)
     rows = []
     for pid, m in meta.items():
@@ -251,19 +252,23 @@ def _fetch_fip_top10(games):
             continue
         s = m["raw"]
         try:
-            hr  = float(s.get("homeRuns",    0) or 0)
-            bb  = float(s.get("baseOnBalls", 0) or 0)
-            hbp = float(s.get("hitByPitch",  0) or 0)
-            so  = float(s.get("strikeOuts",  0) or 0)
-            ip  = m["ip"]
-            fip = (13 * hr + 3 * (bb + hbp) - 2 * so) / ip + FIP_CONST
+            hr   = float(s.get("homeRuns",    0) or 0)
+            bb   = float(s.get("baseOnBalls", 0) or 0)
+            hbp  = float(s.get("hitByPitch",  0) or 0)
+            so   = float(s.get("strikeOuts",  0) or 0)
+            fb   = float(s.get("airOuts",     0) or 0) + hr  # fly balls ≈ air outs + HR
+            ip   = m["ip"]
+            fip  = (13 * hr + 3 * (bb + hbp) - 2 * so) / ip + FIP_CONST
+            xfip = (13 * fb * LG_HR_FB + 3 * (bb + hbp) - 2 * so) / ip + FIP_CONST
         except (ZeroDivisionError, TypeError):
             continue
-        rows.append({**m, "val": fip})
+        rows.append({**m, "val": fip, "xfip": round(xfip, 2)})
     rows.sort(key=lambda x: x["val"])
     top10 = rows[:10]
     for p in top10:
-        p["secondary"] = None
+        p["secondary"]       = {"xfip": p["xfip"]}
+        p["secondary_label"] = "xFIP"
+        p["secondary_col"]   = "xfip"
     return top10
 
 
