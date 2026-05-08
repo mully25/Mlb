@@ -116,14 +116,25 @@ def put(d, text, x, y, fnt, color):
     d.text((x, y), text, font=fnt, fill=(*color, 255))
 
 def tint_logo(img, color):
-    """Recolor all opaque pixels to `color`, preserving transparency."""
+    """
+    Extract the warm/orange outline pixels, fill their interior, then
+    recolor to `color`. Produces a clean solid shape without the fat
+    blue-letter layer.
+    """
+    from scipy.ndimage import binary_fill_holes
     tr, tg, tb = color
-    arr = np.array(img, dtype=np.uint8).copy()
-    mask = arr[..., 3] > 10
-    arr[mask, 0] = tr
-    arr[mask, 1] = tg
-    arr[mask, 2] = tb
-    return Image.fromarray(arr, "RGBA")
+    arr = np.array(img, dtype=np.uint8)
+    r, g, b, a = arr[...,0].astype(int), arr[...,1].astype(int), arr[...,2].astype(int), arr[...,3]
+    # Orange pixels: red dominates over blue
+    orange_mask = (r - b > 60) & (a > 10)
+    # Fill holes inside the orange outline to get a solid shape
+    filled = binary_fill_holes(orange_mask)
+    out = np.zeros_like(arr)
+    out[filled, 0] = tr
+    out[filled, 1] = tg
+    out[filled, 2] = tb
+    out[filled, 3] = 255
+    return Image.fromarray(out, "RGBA")
 
 def fetch_img(url, cache_key):
     path = os.path.join(CACHE_DIR, cache_key)
