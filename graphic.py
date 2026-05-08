@@ -116,21 +116,13 @@ def put(d, text, x, y, fnt, color):
     d.text((x, y), text, font=fnt, fill=(*color, 255))
 
 def tint_logo(img, color):
-    """
-    Keep only warm/light pixels (the actual logo marks), drop background-colored
-    pixels (e.g. Mets navy fill), then recolor what remains to `color`.
-    """
+    """Recolor all opaque pixels to `color`, preserving transparency."""
     tr, tg, tb = color
     arr = np.array(img, dtype=np.uint8).copy()
-    r, g, b, a = arr[...,0], arr[...,1], arr[...,2], arr[...,3]
-    # "Background" pixels: blue dominates and pixel is dark → make transparent
-    blue_bg = (b.astype(int) - r.astype(int) > 40) & (a > 10)
-    arr[blue_bg, 3] = 0
-    # Recolor remaining opaque pixels to the target color
-    keep = arr[..., 3] > 10
-    arr[keep, 0] = tr
-    arr[keep, 1] = tg
-    arr[keep, 2] = tb
+    mask = arr[..., 3] > 10
+    arr[mask, 0] = tr
+    arr[mask, 1] = tg
+    arr[mask, 2] = tb
     return Image.fromarray(arr, "RGBA")
 
 def fetch_img(url, cache_key):
