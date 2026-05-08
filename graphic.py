@@ -78,10 +78,10 @@ def fetch_img(url, cache_key):
         print(f"  [fetch] {cache_key}: {e}")
         return None
 
-def get_headshot(pid):
+def get_silo(pid):
     return fetch_img(
-        f"https://img.mlbstatic.com/mlb-photos/image/upload/w_180,q_auto:best/v1/people/{pid}/headshot/67/current",
-        f"hs_{pid}.png")
+        f"https://img.mlbstatic.com/mlb-photos/image/upload/w_1000,q_auto:best/v1/people/{pid}/headshot/silo/current",
+        f"silo_{pid}.png")
 
 ESPN_ABBR = {
     "AZ": "ari", "ATL": "atl", "BAL": "bal", "BOS": "bos",
@@ -184,7 +184,7 @@ def build(players, output=None):
     # ── Player rows ─────────────────────────────────────────────────────────────
     ROW_H   = (H - y - 6) // 10
     LOGO_SZ = 74
-    HEAD_SZ = 100
+    SILO_SZ = ROW_H  # fill full row height
 
     f_first = font("OpenSans-Bold.ttf", 22)
     f_last  = font("OpenSans-ExtraBold.ttf", 44)
@@ -210,18 +210,18 @@ def build(players, output=None):
             logo = logo.resize((LOGO_SZ, LOGO_SZ), Image.LANCZOS)
             canvas.paste(logo, (ML, cy - LOGO_SZ // 2), logo)
 
-        # Player headshot (circle)
-        hs = get_headshot(p["player_id"])
-        if hs:
-            hs = circle_crop(hs, HEAD_SZ)
-            hx = ML + LOGO_SZ + 14
-            canvas.paste(hs, (hx, cy - HEAD_SZ // 2), hs)
+        # Player silo cutout (head & shoulders, transparent bg)
+        silo = get_silo(p["player_id"])
+        if silo:
+            silo = silo.resize((SILO_SZ, SILO_SZ), Image.LANCZOS)
+            hx = ML + LOGO_SZ + 8
+            canvas.paste(silo, (hx, ry), silo)
 
         # Name (first / LAST stacked)
         parts  = p["name"].split(" ", 1)
         first  = parts[0].upper()
         last   = parts[1].upper() if len(parts) > 1 else ""
-        nx     = ML + LOGO_SZ + 14 + HEAD_SZ + 16
+        nx     = ML + LOGO_SZ + 8 + SILO_SZ + 8
         block_h = 22 + 6 + 44
         ny     = cy - block_h // 2
         put(d, first, nx, ny,      f_first, DIM)
