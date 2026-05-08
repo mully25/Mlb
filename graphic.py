@@ -23,37 +23,38 @@ CACHE_DIR = os.path.join(BASE, "_cache")
 os.makedirs(CACHE_DIR, exist_ok=True)
 
 # ── Team primary colors ────────────────────────────────────────────────────────
+# Hat crown colors (the main color of each team's cap)
 TEAM_COLORS = {
-    "Arizona Diamondbacks":  (167, 25,  48),
-    "Atlanta Braves":        (206, 17,  65),
-    "Baltimore Orioles":     (223, 70,   1),
-    "Boston Red Sox":        (189, 48,  57),
-    "Chicago Cubs":          ( 14, 51, 134),
-    "Chicago White Sox":     ( 50, 50,  50),
-    "Cincinnati Reds":       (198,  1,  31),
-    "Cleveland Guardians":   (  0, 56,  93),
-    "Colorado Rockies":      ( 51,  0, 111),
-    "Detroit Tigers":        ( 12, 35,  64),
-    "Houston Astros":        (  0, 45,  98),
-    "Kansas City Royals":    (  0, 70, 135),
-    "Los Angeles Angels":    (186,  0,  33),
-    "Los Angeles Dodgers":   (  0, 90, 156),
-    "Miami Marlins":         (  0,163, 224),
-    "Milwaukee Brewers":     ( 18, 40,  75),
-    "Minnesota Twins":       (  0, 43,  92),
-    "New York Mets":         (  0, 45, 114),
-    "New York Yankees":      ( 12, 35,  64),
-    "Athletics":             (  0, 56,  49),
-    "Philadelphia Phillies": (232, 24,  40),
-    "Pittsburgh Pirates":    ( 50, 50,  50),
-    "San Diego Padres":      ( 47, 36,  29),
-    "San Francisco Giants":  (200, 70,  20),
-    "Seattle Mariners":      ( 12, 44,  86),
-    "St. Louis Cardinals":   (196, 30,  58),
-    "Tampa Bay Rays":        (  9, 44,  92),
-    "Texas Rangers":         (  0, 50, 120),
-    "Toronto Blue Jays":     ( 19, 74, 142),
-    "Washington Nationals":  (171,  0,   3),
+    "Arizona Diamondbacks":  (  0,   0,   0),
+    "Atlanta Braves":        ( 19,  39,  79),
+    "Baltimore Orioles":     (  0,   0,   0),
+    "Boston Red Sox":        ( 12,  35,  64),
+    "Chicago Cubs":          ( 14,  51, 134),
+    "Chicago White Sox":     (  0,   0,   0),
+    "Cincinnati Reds":       (198,   1,  31),
+    "Cleveland Guardians":   (  0,  56,  93),
+    "Colorado Rockies":      ( 51,   0, 111),
+    "Detroit Tigers":        ( 12,  35,  64),
+    "Houston Astros":        (  0,  45,  98),
+    "Kansas City Royals":    (  0,  70, 135),
+    "Los Angeles Angels":    (186,   0,  33),
+    "Los Angeles Dodgers":   (  0,  90, 156),
+    "Miami Marlins":         (  0,   0,   0),
+    "Milwaukee Brewers":     ( 18,  40,  75),
+    "Minnesota Twins":       (  0,  43,  92),
+    "New York Mets":         (  0,  45, 114),
+    "New York Yankees":      ( 12,  35,  64),
+    "Athletics":             (  0,  56,  49),
+    "Philadelphia Phillies": (232,  24,  40),
+    "Pittsburgh Pirates":    (  0,   0,   0),
+    "San Diego Padres":      ( 47,  36,  29),
+    "San Francisco Giants":  (  0,   0,   0),
+    "Seattle Mariners":      ( 12,  44,  86),
+    "St. Louis Cardinals":   (196,  30,  58),
+    "Tampa Bay Rays":        (  9,  44,  92),
+    "Texas Rangers":         (  0,  50, 120),
+    "Toronto Blue Jays":     ( 19,  74, 142),
+    "Washington Nationals":  ( 20,  34,  90),
 }
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -96,8 +97,8 @@ ESPN_ABBR = {
 def get_logo(team_abbrev):
     espn = ESPN_ABBR.get(team_abbrev, team_abbrev.lower())
     return fetch_img(
-        f"https://a.espncdn.com/i/teamlogos/mlb/500/{espn}.png",
-        f"logo_espn_{espn}.png")
+        f"https://a.espncdn.com/i/teamlogos/mlb/500-dark/{espn}.png",
+        f"logo_cap_{espn}.png")
 
 def circle_crop(img, size):
     img = img.resize((size, size), Image.LANCZOS)
@@ -203,14 +204,7 @@ def build(players, output=None):
 
         cy = ry + ROW_H // 2  # vertical centre of row
 
-        # Team logo on white circle badge
-        BADGE_PAD = 6
-        badge_sz  = LOGO_SZ + BADGE_PAD * 2
-        badge     = Image.new("RGBA", (badge_sz, badge_sz), (0, 0, 0, 0))
-        ImageDraw.Draw(badge).ellipse((0, 0, badge_sz - 1, badge_sz - 1),
-                                      fill=(255, 255, 255, 255))
-        logo_cx = ML + LOGO_SZ // 2
-        canvas.paste(badge, (logo_cx - badge_sz // 2, cy - badge_sz // 2), badge)
+        # Team cap logo
         logo = get_logo(p["team_abbrev"])
         if logo:
             logo = logo.resize((LOGO_SZ, LOGO_SZ), Image.LANCZOS)
