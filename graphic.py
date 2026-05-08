@@ -154,6 +154,22 @@ def season_games():
     except Exception:
         return 162
 
+def fetch_xba():
+    """Return dict of player_id → xBA from Baseball Savant."""
+    try:
+        import io as _io, pandas as pd
+        r = requests.get(
+            "https://baseballsavant.mlb.com/expected_statistics"
+            "?type=batter&year=2026&position=&team=&min=q&csv=true",
+            headers={"User-Agent": "Mozilla/5.0"}, timeout=15)
+        df = pd.read_csv(_io.StringIO(r.text.lstrip("﻿")))
+        df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce")
+        df = df.dropna(subset=["player_id", "est_ba"])
+        return {int(row["player_id"]): float(row["est_ba"]) for _, row in df.iterrows()}
+    except Exception as e:
+        print(f"  xBA fetch failed: {e}")
+        return {}
+
 def fetch_ba():
     hdrs = {"User-Agent": "Mozilla/5.0"}
     url  = ("https://bdfed.stitch.mlbinfra.com/bdfed/stats/player"
@@ -173,7 +189,14 @@ def fetch_ba():
             "val":         float(s.get("avg", "0")),
         })
     rows.sort(key=lambda x: x["val"], reverse=True)
-    return rows[:10]
+    top10 = rows[:10]
+
+    xba_map = fetch_xba()
+    for p in top10:
+        xba = xba_map.get(p["player_id"])
+        p["xba"] = xba
+
+    return top10
 
 # ── Build ──────────────────────────────────────────────────────────────────────
 def build(players, output=None):
@@ -257,11 +280,22 @@ def build(players, output=None):
         put(d, first, nx, ny,      f_first, WHITE)
         put(d, last,  nx, ny + 28, f_last,  WHITE)
 
-        # Stat value (right-aligned)
+        # BA (right-aligned, centered vertically)
         stat_str = (f"{p['val']:.3f}" if p["val"] >= 1
                     else f".{int(round(p['val'] * 1000)):03d}")
+        f_xba  = font("OpenSans-Semibold.ttf", 22)
+        xba    = p.get("xba")
+        xba_str = ("xBA: " + (f"{xba:.3f}" if xba >= 1 else f".{int(round(xba*1000)):03d}")) if xba is not None else ""
+
+        stat_block_h = f_stat.getbbox(stat_str)[3] + (6 + f_xba.getbbox(xba_str)[3] if xba_str else 0)
+        sy = cy - stat_block_h // 2
+
         sw = int(d.textlength(stat_str, font=f_stat))
-        put(d, stat_str, W - 48 - sw, cy - 26, f_stat, WHITE)
+        put(d, stat_str, W - 48 - sw, sy, f_stat, WHITE)
+
+        if xba_str:
+            xw = int(d.textlength(xba_str, font=f_xba))
+            put(d, xba_str, W - 48 - xw, sy + f_stat.getbbox(stat_str)[3] + 4, f_xba, WHITE)
 
     canvas.convert("RGB").save(output, "PNG")
     print(f"Saved → {output}")
