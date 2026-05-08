@@ -25,7 +25,7 @@ os.makedirs(CACHE_DIR, exist_ok=True)
 # ── Team primary colors ────────────────────────────────────────────────────────
 # Hat crown colors (the main color of each team's cap)
 TEAM_COLORS = {
-    "Arizona Diamondbacks":  (  0,   0,   0),
+    "Arizona Diamondbacks":  (167,  25,  48),
     "Atlanta Braves":        ( 19,  39,  79),
     "Baltimore Orioles":     (  0,   0,   0),
     "Boston Red Sox":        ( 12,  35,  64),
