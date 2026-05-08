@@ -212,6 +212,9 @@ def build(players, output=None):
     f_last  = font("OpenSans-ExtraBold.ttf", 44)
     f_stat  = font("OpenSans-ExtraBold.ttf", 52)
 
+    f_rank = font("OpenSans-ExtraBold.ttf", 28)
+    RANK_W = 54  # space reserved for rank number
+
     for i, p in enumerate(players):
         ry = y + i * ROW_H
         tc = TEAM_COLORS.get(p["team"], (55, 55, 75))
@@ -226,24 +229,29 @@ def build(players, output=None):
 
         cy = ry + ROW_H // 2  # vertical centre of row
 
+        # Rank number (#1, #2 …)
+        rank_str = f"#{i + 1}"
+        rw = int(d.textlength(rank_str, font=f_rank))
+        put(d, rank_str, ML + (RANK_W - rw) // 2, cy - 14, f_rank, WHITE)
+
         # Team cap logo
         logo = get_logo(p["team_abbrev"])
         if logo:
             logo = logo.resize((LOGO_SZ, LOGO_SZ), Image.LANCZOS)
-            canvas.paste(logo, (ML, cy - LOGO_SZ // 2), logo)
+            canvas.paste(logo, (ML + RANK_W, cy - LOGO_SZ // 2), logo)
 
         # Player silo cutout (head & shoulders, transparent bg)
         silo = get_silo(p["player_id"])
         if silo:
             silo = silo.resize((SILO_SZ, SILO_SZ), Image.LANCZOS)
-            hx = ML + LOGO_SZ + 8
+            hx = ML + RANK_W + LOGO_SZ + 8
             canvas.paste(silo, (hx, ry), silo)
 
         # Name (first / LAST stacked)
         parts  = p["name"].split(" ", 1)
         first  = parts[0].upper()
         last   = parts[1].upper() if len(parts) > 1 else ""
-        nx     = ML + LOGO_SZ + 8 + SILO_SZ + 8
+        nx     = ML + RANK_W + LOGO_SZ + 8 + SILO_SZ + 8
         block_h = 22 + 6 + 44
         ny     = cy - block_h // 2
         put(d, first, nx, ny,      f_first, WHITE)
