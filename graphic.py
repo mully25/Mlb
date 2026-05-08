@@ -353,7 +353,8 @@ def build(players, stat_key, output=None):
     f_title = font("OpenSans-ExtraBold.ttf", 72)
     f_date  = font("OpenSans-Semibold.ttf", 28)
 
-    put(d, cfg["title"], ML, y, f_title, WHITE)
+    title_w = int(d.textlength(cfg["title"], font=f_title))
+    put(d, cfg["title"], (W - title_w) // 2, y, f_title, WHITE)
     y += f_title.getbbox(cfg["title"])[3] + 10
 
     today  = datetime.now(ZoneInfo("America/New_York")).strftime("%m/%d/%Y")
