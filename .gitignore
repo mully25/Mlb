@@ -2,3 +2,5 @@ __pycache__/
 *.pyc
 *.pyo
 _cache/
+.env
+tiktok_token.json
