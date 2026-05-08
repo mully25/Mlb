@@ -36,35 +36,35 @@ def _avg(v):
 # secondary: {"label": "xBA", "col": "est_ba"}  (from Savant expected_statistics)
 STAT_CONFIG = {
     # ── hitting ────────────────────────────────────────────────────────────────
-    "ba":   {"title": "BATTING AVERAGE LEADERS",  "group": "hitting",  "col": "avg",          "rank": "largest",  "fmt": _avg, "folder": "hitting",
+    "ba":   {"title": "BATTING AVERAGE LEADERS",  "group": "hitting",  "mlb_cat": "battingAverage",            "rank": "largest",  "fmt": _avg, "folder": "hitting",
              "secondary": {"label": "xBA",   "col": "est_ba",   "type": "batter"}},
-    "obp":  {"title": "ON-BASE % LEADERS",         "group": "hitting",  "col": "obp",          "rank": "largest",  "fmt": _avg, "folder": "hitting"},
-    "slg":  {"title": "SLUGGING % LEADERS",        "group": "hitting",  "col": "slg",          "rank": "largest",  "fmt": _avg, "folder": "hitting",
+    "obp":  {"title": "ON-BASE % LEADERS",        "group": "hitting",  "mlb_cat": "onBasePercentage",          "rank": "largest",  "fmt": _avg, "folder": "hitting"},
+    "slg":  {"title": "SLUGGING % LEADERS",       "group": "hitting",  "mlb_cat": "sluggingPercentage",        "rank": "largest",  "fmt": _avg, "folder": "hitting",
              "secondary": {"label": "xSLG",  "col": "est_slg",  "type": "batter"}},
-    "ops":  {"title": "OPS LEADERS",               "group": "hitting",  "col": "ops",          "rank": "largest",  "fmt": _avg, "folder": "hitting"},
-    "woba": {"title": "wOBA LEADERS",              "group": "hitting",  "col": "woba",         "rank": "largest",  "fmt": _avg, "folder": "hitting",
-             "source": "savant_expected",
+    "ops":  {"title": "OPS LEADERS",              "group": "hitting",  "mlb_cat": "onBasePlusSlugging",        "rank": "largest",  "fmt": _avg, "folder": "hitting"},
+    "woba": {"title": "wOBA LEADERS",             "group": "hitting",  "rank": "largest",  "fmt": _avg, "folder": "hitting",
+             "source": "savant_expected", "col": "woba",
              "secondary": {"label": "xwOBA", "col": "est_woba", "type": "batter"}},
-    "hr":   {"title": "HOME RUN LEADERS",          "group": "hitting",  "col": "homeRuns",     "rank": "largest",  "fmt": _int, "folder": "hitting"},
-    "rbi":  {"title": "RBI LEADERS",               "group": "hitting",  "col": "rbi",          "rank": "largest",  "fmt": _int, "folder": "hitting"},
-    "hits": {"title": "HIT LEADERS",               "group": "hitting",  "col": "hits",         "rank": "largest",  "fmt": _int, "folder": "hitting"},
-    "sb":   {"title": "STOLEN BASE LEADERS",       "group": "hitting",  "col": "stolenBases",  "rank": "largest",  "fmt": _int, "folder": "hitting"},
-    "r":    {"title": "RUNS LEADERS",              "group": "hitting",  "col": "runs",         "rank": "largest",  "fmt": _int, "folder": "hitting"},
+    "hr":   {"title": "HOME RUN LEADERS",         "group": "hitting",  "mlb_cat": "homeRuns",                  "rank": "largest",  "fmt": _int, "folder": "hitting"},
+    "rbi":  {"title": "RBI LEADERS",              "group": "hitting",  "mlb_cat": "runsBattedIn",              "rank": "largest",  "fmt": _int, "folder": "hitting"},
+    "hits": {"title": "HIT LEADERS",              "group": "hitting",  "mlb_cat": "hits",                      "rank": "largest",  "fmt": _int, "folder": "hitting"},
+    "sb":   {"title": "STOLEN BASE LEADERS",      "group": "hitting",  "mlb_cat": "stolenBases",               "rank": "largest",  "fmt": _int, "folder": "hitting"},
+    "r":    {"title": "RUNS LEADERS",             "group": "hitting",  "mlb_cat": "runs",                      "rank": "largest",  "fmt": _int, "folder": "hitting"},
     # ── pitching ───────────────────────────────────────────────────────────────
-    "era":  {"title": "ERA LEADERS",               "group": "pitching", "col": "era",          "rank": "smallest", "fmt": _f2,  "folder": "pitching", "min_ip": True,
+    "era":  {"title": "ERA LEADERS",              "group": "pitching", "mlb_cat": "earnedRunAverage",          "rank": "smallest", "fmt": _f2,  "folder": "pitching",
              "secondary": {"label": "xERA",  "col": "xera",     "type": "pitcher"}},
-    "whip": {"title": "WHIP LEADERS",              "group": "pitching", "col": "whip",         "rank": "smallest", "fmt": _f2,  "folder": "pitching", "min_ip": True},
-    "k":    {"title": "STRIKEOUT LEADERS",         "group": "pitching", "col": "strikeOuts",   "rank": "largest",  "fmt": _int, "folder": "pitching"},
-    "w":    {"title": "WIN LEADERS",               "group": "pitching", "col": "wins",         "rank": "largest",  "fmt": _int, "folder": "pitching"},
-    "sv":   {"title": "SAVE LEADERS",              "group": "pitching", "col": "saves",        "rank": "largest",  "fmt": _int, "folder": "pitching"},
-    "k9":   {"title": "K/9 LEADERS",              "group": "pitching", "col": "strikeoutsPer9Inn", "rank": "largest",  "fmt": _f2, "folder": "pitching", "min_ip": True},
-    "fip":  {"title": "FIP LEADERS",              "group": "pitching", "col": "fip",          "rank": "smallest", "fmt": _f2,  "folder": "pitching", "min_ip": True,
+    "whip": {"title": "WHIP LEADERS",             "group": "pitching", "mlb_cat": "walksAndHitsPerInningPitched", "rank": "smallest", "fmt": _f2, "folder": "pitching"},
+    "k":    {"title": "STRIKEOUT LEADERS",        "group": "pitching", "mlb_cat": "strikeouts",                "rank": "largest",  "fmt": _int, "folder": "pitching"},
+    "w":    {"title": "WIN LEADERS",              "group": "pitching", "mlb_cat": "wins",                      "rank": "largest",  "fmt": _int, "folder": "pitching"},
+    "sv":   {"title": "SAVE LEADERS",             "group": "pitching", "mlb_cat": "saves",                     "rank": "largest",  "fmt": _int, "folder": "pitching"},
+    "k9":   {"title": "K/9 LEADERS",             "group": "pitching", "mlb_cat": "strikeoutsPer9Inn",          "rank": "largest",  "fmt": _f2,  "folder": "pitching"},
+    "fip":  {"title": "FIP LEADERS",             "group": "pitching", "rank": "smallest", "fmt": _f2,  "folder": "pitching",
              "source": "bdfed_computed_fip"},
-    "baa":  {"title": "BAA LEADERS",              "group": "pitching", "col": "avg",          "rank": "smallest", "fmt": _avg, "folder": "pitching", "min_ip": True,
+    "baa":  {"title": "BAA LEADERS",             "group": "pitching", "mlb_cat": "battingAverage",             "rank": "smallest", "fmt": _avg, "folder": "pitching",
              "secondary": {"label": "xBA",   "col": "est_ba",   "type": "pitcher"}},
-    "war_b":{"title": "BATTING WAR LEADERS",      "group": "hitting",  "col": "WAR",          "rank": "largest",  "fmt": _f1,  "folder": "hitting",
+    "war_b":{"title": "BATTING WAR LEADERS",     "group": "hitting",  "rank": "largest",  "fmt": _f1,  "folder": "hitting",
              "source": "bref_war", "bref_type": "bat"},
-    "war_p":{"title": "PITCHING WAR LEADERS",     "group": "pitching", "col": "WAR",          "rank": "largest",  "fmt": _f1,  "folder": "pitching",
+    "war_p":{"title": "PITCHING WAR LEADERS",    "group": "pitching", "rank": "largest",  "fmt": _f1,  "folder": "pitching",
              "source": "bref_war", "bref_type": "pitch"},
 }
 
@@ -343,59 +343,39 @@ def _fetch_bref_war_top10(bref_type, games):
 def fetch_top10(stat_key):
     cfg   = STAT_CONFIG[stat_key]
     group = cfg["group"]
-    col   = cfg["col"]
     rank  = cfg["rank"]
     hdrs  = {"User-Agent": "Mozilla/5.0"}
-    games = season_games()
 
     if cfg.get("source") == "savant_expected":
-        return _fetch_top10_savant(stat_key, games)
+        return _fetch_top10_savant(stat_key, season_games())
     if cfg.get("source") == "bdfed_computed_fip":
-        return _fetch_fip_top10(games)
+        return _fetch_fip_top10(season_games())
     if cfg.get("source") == "bref_war":
-        return _fetch_bref_war_top10(cfg["bref_type"], games)
+        return _fetch_bref_war_top10(cfg["bref_type"], season_games())
 
-    order = "desc" if rank == "largest" else "asc"
-    url   = (f"https://bdfed.stitch.mlbinfra.com/bdfed/stats/player"
-             f"?stitch_env=prod&season=2026&sportId=1&stats=season"
-             f"&group={group}&gameType=R&offset=0&sortStat={col}"
-             f"&order={order}&limit=100")
-    data  = requests.get(url, headers=hdrs, timeout=15).json()
+    # Use MLB.com official leaderboard (qualification rules built in)
+    mlb_cat = cfg["mlb_cat"]
+    url = (f"https://statsapi.mlb.com/api/v1/stats/leaders"
+           f"?leaderCategories={mlb_cat}&season=2026&leaderGameTypes=R"
+           f"&limit=10&statGroup={group}&hydrate=person,team")
+    data = requests.get(url, headers=hdrs, timeout=15).json()
+    leaders = data["leagueLeaders"][0]["leaders"]
 
     rows = []
-    for s in data.get("stats", []):
-        val = s.get(col)
-        if val is None:
-            continue
+    for entry in leaders:
         try:
-            val = float(val)
+            val = float(entry["value"])
         except (ValueError, TypeError):
             continue
-
-        # Qualification filters
-        if group == "hitting":
-            min_pa = int(3.1 * games)
-            if int(s.get("plateAppearances", 0)) < min_pa:
-                continue
-        elif cfg.get("min_ip"):
-            min_ip = max(1, games - 2)
-            if _parse_ip(s.get("inningsPitched", "0")) < min_ip:
-                continue
-
         rows.append({
-            "name":        s["playerFullName"],
-            "player_id":   int(s["playerId"]),
-            "team":        s["teamName"],
-            "team_abbrev": s.get("teamAbbrev", ""),
+            "name":        entry["person"]["fullName"],
+            "player_id":   int(entry["person"]["id"]),
+            "team":        entry["team"]["name"],
+            "team_abbrev": entry["team"].get("abbreviation", ""),
             "val":         val,
         })
 
-    if rank == "smallest":
-        rows.sort(key=lambda x: x["val"])
-    else:
-        rows.sort(key=lambda x: x["val"], reverse=True)
-
-    top10 = rows[:10]
+    top10 = rows[:10]  # already ranked by MLB.com; cap at 10
 
     # Secondary stat (expected version from Savant)
     sec = cfg.get("secondary")
