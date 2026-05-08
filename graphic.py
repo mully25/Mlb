@@ -229,10 +229,10 @@ def build(players, output=None):
 
         cy = ry + ROW_H // 2  # vertical centre of row
 
-        # Rank number (#1, #2 …)
+        # Rank number (#1, #2 …) — flush to left edge
         rank_str = f"#{i + 1}"
         rw = int(d.textlength(rank_str, font=f_rank))
-        put(d, rank_str, ML + (RANK_W - rw) // 2, cy - 14, f_rank, WHITE)
+        put(d, rank_str, (RANK_W - rw) // 2 + 4, cy - 14, f_rank, WHITE)
 
         # Team cap logo
         logo = get_logo(p["team_abbrev"])
