@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MLB Top 10 Leaders</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0d0d12; color: #fff; font-family: 'Segoe UI', sans-serif; }
+    header { text-align: center; padding: 40px 20px 20px; }
+    header h1 { font-size: 2.2rem; letter-spacing: 2px; text-transform: uppercase; }
+    header p  { color: #888; margin-top: 8px; font-size: 0.95rem; }
+    .section-title {
+      text-align: center; font-size: 1.1rem; letter-spacing: 3px;
+      text-transform: uppercase; color: #aaa; margin: 40px 0 16px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    .grid img {
+      width: 100%; border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      transition: transform 0.2s;
+    }
+    .grid img:hover { transform: scale(1.02); }
+    footer {
+      text-align: center; padding: 40px 20px;
+      color: #444; font-size: 0.85rem;
+    }
+    footer a { color: #666; text-decoration: none; margin: 0 10px; }
+    footer a:hover { color: #aaa; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>MLB Top 10 Leaders</h1>
+    <p>Updated daily with the latest 2026 season stats</p>
+  </header>
+
+  <div class="section-title">Hitting</div>
+  <div class="grid">
+    <img src="../hitting/ba_top10.png"   alt="Batting Average Leaders">
+    <img src="../hitting/obp_top10.png"  alt="On-Base % Leaders">
+    <img src="../hitting/slg_top10.png"  alt="Slugging % Leaders">
+    <img src="../hitting/ops_top10.png"  alt="OPS Leaders">
+    <img src="../hitting/woba_top10.png" alt="wOBA Leaders">
+    <img src="../hitting/hr_top10.png"   alt="Home Run Leaders">
+    <img src="../hitting/rbi_top10.png"  alt="RBI Leaders">
+    <img src="../hitting/hits_top10.png" alt="Hit Leaders">
+    <img src="../hitting/sb_top10.png"   alt="Stolen Base Leaders">
+    <img src="../hitting/r_top10.png"    alt="Runs Leaders">
+    <img src="../hitting/war_b_top10.png" alt="Batting WAR Leaders">
+  </div>
+
+  <div class="section-title">Pitching</div>
+  <div class="grid">
+    <img src="../pitching/era_top10.png"  alt="ERA Leaders">
+    <img src="../pitching/whip_top10.png" alt="WHIP Leaders">
+    <img src="../pitching/baa_top10.png"  alt="BAA Leaders">
+    <img src="../pitching/k_top10.png"    alt="Strikeout Leaders">
+    <img src="../pitching/k9_top10.png"   alt="K/9 Leaders">
+    <img src="../pitching/fip_top10.png"  alt="FIP Leaders">
+    <img src="../pitching/w_top10.png"    alt="Win Leaders">
+    <img src="../pitching/sv_top10.png"   alt="Save Leaders">
+    <img src="../pitching/war_p_top10.png" alt="Pitching WAR Leaders">
+  </div>
+
+  <footer>
+    <p>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Service</a>
+    </p>
+    <p style="margin-top:12px">© 2026 MLB Stats Graphics</p>
+  </footer>
+</body>
+</html>
