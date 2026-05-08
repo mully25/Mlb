@@ -51,7 +51,7 @@ TEAM_COLORS = {
     "San Francisco Giants":  (253,  90,  30),
     "Seattle Mariners":      ( 12,  44,  86),
     "St. Louis Cardinals":   (196,  30,  58),
-    "Tampa Bay Rays":        (  9,  44,  92),
+    "Tampa Bay Rays":        ( 16,  78, 146),
     "Texas Rangers":         (  0,  50, 120),
     "Toronto Blue Jays":     ( 19,  74, 142),
     "Washington Nationals":  ( 20,  34,  90),
@@ -219,8 +219,8 @@ def build(players, output=None):
         ry = y + i * ROW_H
         tc = TEAM_COLORS.get(p["team"], (55, 55, 75))
 
-        # Solid team color background
-        canvas.paste(row_solid(tc, ROW_H, W), (0, ry))
+        # Solid team color background (+1 to eliminate any sub-pixel gaps)
+        canvas.paste(row_solid(tc, ROW_H + 1, W), (0, ry))
 
         # Divider line between rows
         if i > 0:
