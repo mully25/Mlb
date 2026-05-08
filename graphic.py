@@ -93,9 +93,7 @@ TEAM_COLORS = {
 }
 
 # Teams whose logo should be recolored to a solid color (R, G, B)
-LOGO_TINT = {
-    "New York Mets": (255, 92, 0),
-}
+LOGO_TINT = {}
 
 ESPN_ABBR = {
     "AZ": "ari", "ATL": "atl", "BAL": "bal", "BOS": "bos",
