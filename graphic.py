@@ -233,6 +233,28 @@ def _bdfed_meta(group="hitting", limit=500):
         }
     return meta
 
+def _tiebreak(players, rank):
+    """Re-sort players so tied primary stats are broken by their expected (secondary) stat."""
+    reverse = (rank == "largest")
+    INF = float("inf")
+
+    def key(p):
+        # Round to 2dp so players that display identically are treated as tied
+        primary = round(float(p["val"]), 2)
+        sec     = p.get("secondary") or {}
+        col     = p.get("secondary_col")
+        try:
+            sec_val = float(sec[col]) if (sec and col and col in sec) else None
+        except (TypeError, ValueError):
+            sec_val = None
+        # Missing secondary → worst possible rank
+        if sec_val is None:
+            sec_val = -INF if reverse else INF
+        return (primary, sec_val)
+
+    return sorted(players, key=key, reverse=reverse)
+
+
 def _parse_ip(ip_str):
     try:
         parts = str(ip_str).split(".")
@@ -269,6 +291,7 @@ def _fetch_fip_top10(games):
         p["secondary"]       = {"xfip": p["xfip"]}
         p["secondary_label"] = "xFIP"
         p["secondary_col"]   = "xfip"
+    top10 = _tiebreak(top10, "smallest")
     return top10
 
 
@@ -373,6 +396,7 @@ def fetch_top10(stat_key):
             p["secondary"] = sec_map.get(p["player_id"])
             p["secondary_label"] = sec["label"]
             p["secondary_col"]   = sec["col"]
+        top10 = _tiebreak(top10, rank)
     else:
         for p in top10:
             p["secondary"] = None
@@ -435,6 +459,7 @@ def _fetch_top10_savant(stat_key, games):
             p["secondary"] = sec_map.get(p["player_id"])
             p["secondary_label"] = sec["label"]
             p["secondary_col"]   = sec["col"]
+        top10 = _tiebreak(top10, "largest")
     else:
         for p in top10:
             p["secondary"] = None
