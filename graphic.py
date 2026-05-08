@@ -275,7 +275,7 @@ def _fetch_fip_top10(games):
     """Compute FIP and xFIP from bdfed pitching data."""
     FIP_CONST  = 3.10
     LG_HR_FB   = 0.104   # league-average HR/FB rate for xFIP
-    min_ip = games - 1   # 1-game grace period so borderline starters qualify
+    min_ip = max(1, games - 2)
     meta = _bdfed_meta("pitching", limit=500)
     rows = []
     for pid, m in meta.items():
@@ -378,7 +378,7 @@ def fetch_top10(stat_key):
             if int(s.get("plateAppearances", 0)) < min_pa:
                 continue
         elif cfg.get("min_ip"):
-            min_ip = games * 1.0
+            min_ip = max(1, games - 2)
             if _parse_ip(s.get("inningsPitched", "0")) < min_ip:
                 continue
 
