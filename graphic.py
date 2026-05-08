@@ -97,7 +97,7 @@ TEAM_COLORS = {
     "Tampa Bay Rays":        ( 10,  52, 104),
     "Texas Rangers":         (  0,  50, 120),
     "Toronto Blue Jays":     ( 19,  74, 142),
-    "Washington Nationals":  ( 20,  34,  90),
+    "Washington Nationals":  (171,   0,   3),
 }
 
 # Teams whose logo should be recolored to a solid color (R, G, B)
