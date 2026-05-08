@@ -95,20 +95,9 @@ ESPN_ABBR = {
 
 def get_logo(team_abbrev):
     espn = ESPN_ABBR.get(team_abbrev, team_abbrev.lower())
-    img  = fetch_img(
+    return fetch_img(
         f"https://a.espncdn.com/i/teamlogos/mlb/500/{espn}.png",
         f"logo_espn_{espn}.png")
-    if img is None:
-        return None
-    # Teams with dark/black logos need to be made white so they show on dark BG
-    if team_abbrev in ("NYY", "CWS", "PIT"):
-        arr = np.array(img)
-        # Replace dark pixels (low RGB) with white, keep alpha channel
-        rgb   = arr[:, :, :3].astype(np.float32)
-        dark  = rgb.mean(axis=2) < 100
-        arr[dark, :3] = 255
-        img = Image.fromarray(arr, "RGBA")
-    return img
 
 def circle_crop(img, size):
     img = img.resize((size, size), Image.LANCZOS)
@@ -214,7 +203,14 @@ def build(players, output=None):
 
         cy = ry + ROW_H // 2  # vertical centre of row
 
-        # Team logo
+        # Team logo on white circle badge
+        BADGE_PAD = 6
+        badge_sz  = LOGO_SZ + BADGE_PAD * 2
+        badge     = Image.new("RGBA", (badge_sz, badge_sz), (0, 0, 0, 0))
+        ImageDraw.Draw(badge).ellipse((0, 0, badge_sz - 1, badge_sz - 1),
+                                      fill=(255, 255, 255, 255))
+        logo_cx = ML + LOGO_SZ // 2
+        canvas.paste(badge, (logo_cx - badge_sz // 2, cy - badge_sz // 2), badge)
         logo = get_logo(p["team_abbrev"])
         if logo:
             logo = logo.resize((LOGO_SZ, LOGO_SZ), Image.LANCZOS)
