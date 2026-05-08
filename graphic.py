@@ -26,6 +26,7 @@ os.makedirs(CACHE_DIR, exist_ok=True)
 
 # ── Formatters ─────────────────────────────────────────────────────────────────
 def _int(v):  return str(int(round(float(v))))
+def _f1(v):   return f"{float(v):.1f}"
 def _f2(v):   return f"{float(v):.2f}"
 def _avg(v):
     v = float(v)
@@ -56,6 +57,13 @@ STAT_CONFIG = {
     "k":    {"title": "STRIKEOUT LEADERS",         "group": "pitching", "col": "strikeOuts",   "rank": "largest",  "fmt": _int, "folder": "pitching"},
     "w":    {"title": "WIN LEADERS",               "group": "pitching", "col": "wins",         "rank": "largest",  "fmt": _int, "folder": "pitching"},
     "sv":   {"title": "SAVE LEADERS",              "group": "pitching", "col": "saves",        "rank": "largest",  "fmt": _int, "folder": "pitching"},
+    "k9":   {"title": "K/9 LEADERS",              "group": "pitching", "col": "strikeoutsPer9Inn", "rank": "largest",  "fmt": _f2, "folder": "pitching", "min_ip": True},
+    "fip":  {"title": "FIP LEADERS",              "group": "pitching", "col": "fip",          "rank": "smallest", "fmt": _f2,  "folder": "pitching", "min_ip": True,
+             "source": "bdfed_computed_fip"},
+    "war_b":{"title": "BATTING WAR LEADERS",      "group": "hitting",  "col": "WAR",          "rank": "largest",  "fmt": _f1,  "folder": "hitting",
+             "source": "bref_war", "bref_type": "bat"},
+    "war_p":{"title": "PITCHING WAR LEADERS",     "group": "pitching", "col": "WAR",          "rank": "largest",  "fmt": _f1,  "folder": "pitching",
+             "source": "bref_war", "bref_type": "pitch"},
 }
 
 # ── Team hat colors ────────────────────────────────────────────────────────────
@@ -204,12 +212,96 @@ def season_games():
     except Exception:
         return 162
 
+def _bdfed_meta(group="hitting", limit=500):
+    """Return {playerId: {name, team, team_abbrev, pa, ip}} from bdfed."""
+    sort = "avg" if group == "hitting" else "era"
+    url = (f"https://bdfed.stitch.mlbinfra.com/bdfed/stats/player"
+           f"?stitch_env=prod&season=2026&sportId=1&stats=season"
+           f"&group={group}&gameType=R&offset=0&sortStat={sort}&order=desc&limit={limit}")
+    data = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=15).json()
+    meta = {}
+    for s in data.get("stats", []):
+        pid = int(s["playerId"])
+        meta[pid] = {
+            "name":        s["playerFullName"],
+            "player_id":   pid,
+            "team":        s["teamName"],
+            "team_abbrev": s.get("teamAbbrev", ""),
+            "pa":          int(s.get("plateAppearances", 0)),
+            "ip":          _parse_ip(s.get("inningsPitched", "0")),
+            "raw":         s,
+        }
+    return meta
+
 def _parse_ip(ip_str):
     try:
         parts = str(ip_str).split(".")
         return int(parts[0]) + int(parts[1]) / 3 if len(parts) == 2 else float(ip_str)
     except Exception:
         return 0.0
+
+def _fetch_fip_top10(games):
+    """Compute FIP from bdfed pitching data: FIP = (13*HR + 3*(BB+HBP) - 2*SO) / IP + 3.10"""
+    FIP_CONST = 3.10
+    min_ip = games * 1.0
+    meta = _bdfed_meta("pitching", limit=500)
+    rows = []
+    for pid, m in meta.items():
+        if m["ip"] < min_ip:
+            continue
+        s = m["raw"]
+        try:
+            hr  = float(s.get("homeRuns",    0) or 0)
+            bb  = float(s.get("baseOnBalls", 0) or 0)
+            hbp = float(s.get("hitByPitch",  0) or 0)
+            so  = float(s.get("strikeOuts",  0) or 0)
+            ip  = m["ip"]
+            fip = (13 * hr + 3 * (bb + hbp) - 2 * so) / ip + FIP_CONST
+        except (ZeroDivisionError, TypeError):
+            continue
+        rows.append({**m, "val": fip})
+    rows.sort(key=lambda x: x["val"])
+    top10 = rows[:10]
+    for p in top10:
+        p["secondary"] = None
+    return top10
+
+
+def _fetch_bref_war_top10(bref_type, games):
+    """Fetch WAR from Baseball Reference war_daily_{bat|pit}.txt and join with bdfed metadata."""
+    url = f"https://www.baseball-reference.com/data/war_daily_{bref_type}.txt"
+    r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=20)
+    df = pd.read_csv(io.StringIO(r.text), on_bad_lines="skip", engine="python")
+    df = df[df["year_ID"] == 2026].copy()
+    df["mlb_ID"] = pd.to_numeric(df["mlb_ID"], errors="coerce")
+    df = df.dropna(subset=["mlb_ID", "WAR"])
+    # Sum WAR across stints (players who changed teams)
+    war_by_id = df.groupby("mlb_ID")["WAR"].sum().reset_index()
+    war_by_id["mlb_ID"] = war_by_id["mlb_ID"].astype(int)
+
+    group = "hitting" if bref_type == "bat" else "pitching"
+    meta  = _bdfed_meta(group, limit=500)
+    games_count = games
+
+    rows = []
+    for _, row in war_by_id.iterrows():
+        pid = int(row["mlb_ID"])
+        if pid not in meta:
+            continue
+        m = meta[pid]
+        # Qualification filter
+        if bref_type == "bat" and m["pa"] < int(3.1 * games_count):
+            continue
+        if bref_type == "pit" and m["ip"] < games_count * 1.0:
+            continue
+        rows.append({**m, "val": float(row["WAR"])})
+
+    rows.sort(key=lambda x: x["val"], reverse=True)
+    top10 = rows[:10]
+    for p in top10:
+        p["secondary"] = None
+    return top10
+
 
 def fetch_top10(stat_key):
     cfg   = STAT_CONFIG[stat_key]
@@ -221,6 +313,10 @@ def fetch_top10(stat_key):
 
     if cfg.get("source") == "savant_expected":
         return _fetch_top10_savant(stat_key, games)
+    if cfg.get("source") == "bdfed_computed_fip":
+        return _fetch_fip_top10(games)
+    if cfg.get("source") == "bref_war":
+        return _fetch_bref_war_top10(cfg["bref_type"], games)
 
     order = "desc" if rank == "largest" else "asc"
     url   = (f"https://bdfed.stitch.mlbinfra.com/bdfed/stats/player"
