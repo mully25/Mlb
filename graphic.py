@@ -77,7 +77,7 @@ TEAM_COLORS = {
     "Miami Marlins":         (  0, 163, 224),
     "Milwaukee Brewers":     ( 18,  40,  75),
     "Minnesota Twins":       (  0,  43,  92),
-    "New York Mets":         (255,  92,   0),
+    "New York Mets":         (  0,  45, 114),
     "New York Yankees":      ( 12,  35,  64),
     "Athletics":             (  0,  56,  49),
     "Philadelphia Phillies": (232,  24,  40),
@@ -90,6 +90,11 @@ TEAM_COLORS = {
     "Texas Rangers":         (  0,  50, 120),
     "Toronto Blue Jays":     ( 19,  74, 142),
     "Washington Nationals":  ( 20,  34,  90),
+}
+
+# Teams whose logo should be recolored to a solid color (R, G, B)
+LOGO_TINT = {
+    "New York Mets": (255, 92, 0),
 }
 
 ESPN_ABBR = {
@@ -109,6 +114,15 @@ def font(name, size):
 
 def put(d, text, x, y, fnt, color):
     d.text((x, y), text, font=fnt, fill=(*color, 255))
+
+def tint_logo(img, color):
+    """Replace all visible pixels with a solid color, preserving alpha."""
+    r, g, b = color
+    arr = np.array(img)
+    arr[..., 0] = r
+    arr[..., 1] = g
+    arr[..., 2] = b
+    return Image.fromarray(arr, "RGBA")
 
 def fetch_img(url, cache_key):
     path = os.path.join(CACHE_DIR, cache_key)
@@ -394,6 +408,9 @@ def build(players, stat_key, output=None):
         # Logo
         logo = get_logo(p["team_abbrev"])
         if logo:
+            tint = LOGO_TINT.get(p["team"])
+            if tint:
+                logo = tint_logo(logo, tint)
             logo = logo.resize((LOGO_SZ, LOGO_SZ), Image.LANCZOS)
             canvas.paste(logo, (ML + RANK_W, cy - LOGO_SZ // 2), logo)
 
