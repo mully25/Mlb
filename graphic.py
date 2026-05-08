@@ -95,9 +95,20 @@ ESPN_ABBR = {
 
 def get_logo(team_abbrev):
     espn = ESPN_ABBR.get(team_abbrev, team_abbrev.lower())
-    return fetch_img(
+    img  = fetch_img(
         f"https://a.espncdn.com/i/teamlogos/mlb/500/{espn}.png",
         f"logo_espn_{espn}.png")
+    if img is None:
+        return None
+    # Teams with dark/black logos need to be made white so they show on dark BG
+    if team_abbrev in ("NYY", "CWS", "PIT"):
+        arr = np.array(img)
+        # Replace dark pixels (low RGB) with white, keep alpha channel
+        rgb   = arr[:, :, :3].astype(np.float32)
+        dark  = rgb.mean(axis=2) < 100
+        arr[dark, :3] = 255
+        img = Image.fromarray(arr, "RGBA")
+    return img
 
 def circle_crop(img, size):
     img = img.resize((size, size), Image.LANCZOS)
@@ -189,7 +200,7 @@ def build(players, output=None):
     # ── Player rows ─────────────────────────────────────────────────────────────
     ROW_H   = (H - y - 6) // 10
     LOGO_SZ = 74
-    HEAD_SZ = 84
+    HEAD_SZ = 100
 
     f_first = font("OpenSans-Bold.ttf", 22)
     f_last  = font("OpenSans-ExtraBold.ttf", 44)
