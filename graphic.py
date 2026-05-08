@@ -192,17 +192,16 @@ def build(players, output=None):
     f_title = font("OpenSans-ExtraBold.ttf", 72)
     f_date  = font("OpenSans-Semibold.ttf", 28)
 
+    # Title — left aligned
     put(d, "BATTING AVERAGE LEADERS", ML, y, f_title, WHITE)
-    y += int(d.textlength("X", font=f_title)) + 10  # use height proxy
+    title_h = f_title.getbbox("BATTING AVERAGE LEADERS")[3]
+    y += title_h + 10
 
-    # measure actual text height
-    bbox = f_title.getbbox("BATTING AVERAGE LEADERS")
-    y = 30 + (bbox[3] - bbox[1]) + 12
-
-    today = datetime.now(ZoneInfo("America/New_York")).strftime("%B %-d, %Y")
-    put(d, today, ML, y, f_date, RED)
-    bbox2 = f_date.getbbox(today)
-    y += (bbox2[3] - bbox2[1]) + 20
+    # Date — centered, MM/DD/YYYY
+    today     = datetime.now(ZoneInfo("America/New_York")).strftime("%m/%d/%Y")
+    date_w    = int(d.textlength(today, font=f_date))
+    put(d, today, (W - date_w) // 2, y, f_date, RED)
+    y += f_date.getbbox(today)[3] + 20
 
     # ── Player rows ─────────────────────────────────────────────────────────────
     ROW_H   = (H - y - 6) // 10
