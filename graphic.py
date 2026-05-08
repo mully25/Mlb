@@ -200,7 +200,7 @@ def build(players, output=None):
     # Date — centered, MM/DD/YYYY
     today     = datetime.now(ZoneInfo("America/New_York")).strftime("%m/%d/%Y")
     date_w    = int(d.textlength(today, font=f_date))
-    put(d, today, (W - date_w) // 2, y, f_date, RED)
+    put(d, today, (W - date_w) // 2, y, f_date, WHITE)
     y += f_date.getbbox(today)[3] + 20
 
     # ── Player rows ─────────────────────────────────────────────────────────────
@@ -246,7 +246,7 @@ def build(players, output=None):
         nx     = ML + LOGO_SZ + 8 + SILO_SZ + 8
         block_h = 22 + 6 + 44
         ny     = cy - block_h // 2
-        put(d, first, nx, ny,      f_first, DIM)
+        put(d, first, nx, ny,      f_first, WHITE)
         put(d, last,  nx, ny + 28, f_last,  WHITE)
 
         # Stat value (right-aligned)
