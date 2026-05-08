@@ -60,6 +60,8 @@ STAT_CONFIG = {
     "k9":   {"title": "K/9 LEADERS",              "group": "pitching", "col": "strikeoutsPer9Inn", "rank": "largest",  "fmt": _f2, "folder": "pitching", "min_ip": True},
     "fip":  {"title": "FIP LEADERS",              "group": "pitching", "col": "fip",          "rank": "smallest", "fmt": _f2,  "folder": "pitching", "min_ip": True,
              "source": "bdfed_computed_fip"},
+    "baa":  {"title": "BAA LEADERS",              "group": "pitching", "col": "avg",          "rank": "smallest", "fmt": _avg, "folder": "pitching", "min_ip": True,
+             "secondary": {"label": "xBA",   "col": "est_ba",   "type": "pitcher"}},
     "war_b":{"title": "BATTING WAR LEADERS",      "group": "hitting",  "col": "WAR",          "rank": "largest",  "fmt": _f1,  "folder": "hitting",
              "source": "bref_war", "bref_type": "bat"},
     "war_p":{"title": "PITCHING WAR LEADERS",     "group": "pitching", "col": "WAR",          "rank": "largest",  "fmt": _f1,  "folder": "pitching",
@@ -233,21 +235,28 @@ def _bdfed_meta(group="hitting", limit=500):
         }
     return meta
 
-def _tiebreak(players, rank):
+def _fmt_dp(fmt):
+    """Return display decimal places for a formatter function."""
+    if fmt is _int:  return 0
+    if fmt is _f1:   return 1
+    if fmt is _f2:   return 2
+    return 3  # _avg
+
+def _tiebreak(players, rank, fmt=None):
     """Re-sort players so tied primary stats are broken by their expected (secondary) stat."""
     reverse = (rank == "largest")
-    INF = float("inf")
+    INF     = float("inf")
+    dp      = _fmt_dp(fmt) if fmt is not None else 2
 
     def key(p):
-        # Round to 2dp so players that display identically are treated as tied
-        primary = round(float(p["val"]), 2)
+        # Round to display precision so visually identical values are treated as tied
+        primary = round(float(p["val"]), dp)
         sec     = p.get("secondary") or {}
         col     = p.get("secondary_col")
         try:
             sec_val = float(sec[col]) if (sec and col and col in sec) else None
         except (TypeError, ValueError):
             sec_val = None
-        # Missing secondary → worst possible rank
         if sec_val is None:
             sec_val = -INF if reverse else INF
         return (primary, sec_val)
@@ -291,7 +300,7 @@ def _fetch_fip_top10(games):
         p["secondary"]       = {"xfip": p["xfip"]}
         p["secondary_label"] = "xFIP"
         p["secondary_col"]   = "xfip"
-    top10 = _tiebreak(top10, "smallest")
+    top10 = _tiebreak(top10, "smallest", _f2)
     return top10
 
 
@@ -396,7 +405,7 @@ def fetch_top10(stat_key):
             p["secondary"] = sec_map.get(p["player_id"])
             p["secondary_label"] = sec["label"]
             p["secondary_col"]   = sec["col"]
-        top10 = _tiebreak(top10, rank)
+        top10 = _tiebreak(top10, rank, cfg.get("fmt"))
     else:
         for p in top10:
             p["secondary"] = None
@@ -459,7 +468,7 @@ def _fetch_top10_savant(stat_key, games):
             p["secondary"] = sec_map.get(p["player_id"])
             p["secondary_label"] = sec["label"]
             p["secondary_col"]   = sec["col"]
-        top10 = _tiebreak(top10, "largest")
+        top10 = _tiebreak(top10, "largest", cfg.get("fmt"))
     else:
         for p in top10:
             p["secondary"] = None
