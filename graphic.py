@@ -83,6 +83,33 @@ def get_silo(pid):
         f"https://img.mlbstatic.com/mlb-photos/image/upload/w_1000,q_auto:best/v1/people/{pid}/headshot/silo/current",
         f"silo_{pid}.png")
 
+def ensure_silos(players):
+    """Download any missing silo images before building, with retries."""
+    missing = [p for p in players
+               if not os.path.exists(os.path.join(CACHE_DIR, f"silo_{p['player_id']}.png"))]
+    if not missing:
+        return
+    print(f"Downloading {len(missing)} missing silo(s)…")
+    for p in missing:
+        pid = p["player_id"]
+        url = (f"https://img.mlbstatic.com/mlb-photos/image/upload/"
+               f"w_1000,q_auto:best/v1/people/{pid}/headshot/silo/current")
+        dest = os.path.join(CACHE_DIR, f"silo_{pid}.png")
+        for attempt in range(3):
+            try:
+                r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=30)
+                r.raise_for_status()
+                img = Image.open(io.BytesIO(r.content)).convert("RGBA")
+                img.save(dest, "PNG")
+                print(f"  ✓ {p['name']}")
+                break
+            except Exception as e:
+                wait = 2 ** attempt
+                print(f"  attempt {attempt+1} failed for {p['name']}: {e} — retrying in {wait}s")
+                import time; time.sleep(wait)
+        else:
+            print(f"  ✗ Could not download silo for {p['name']} after 3 attempts")
+
 ESPN_ABBR = {
     "AZ": "ari", "ATL": "atl", "BAL": "bal", "BOS": "bos",
     "CHC": "chc", "CWS": "chw", "CIN": "cin", "CLE": "cle",
@@ -242,4 +269,5 @@ if __name__ == "__main__":
     players = fetch_ba()
     for p in players:
         print(f"  {p['name']:<25}  {p['val']:.3f}  ({p['team']})")
+    ensure_silos(players)
     build(players)
