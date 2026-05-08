@@ -51,7 +51,7 @@ TEAM_COLORS = {
     "San Francisco Giants":  (253,  90,  30),
     "Seattle Mariners":      ( 12,  44,  86),
     "St. Louis Cardinals":   (196,  30,  58),
-    "Tampa Bay Rays":        ( 16,  78, 146),
+    "Tampa Bay Rays":        ( 10,  52, 104),
     "Texas Rangers":         (  0,  50, 120),
     "Toronto Blue Jays":     ( 19,  74, 142),
     "Washington Nationals":  ( 20,  34,  90),
