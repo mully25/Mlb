@@ -118,15 +118,9 @@ def circle_crop(img, size):
     out.paste(img, (0, 0), mask)
     return out
 
-def row_gradient(team_color, row_h, row_w, fade=0.60):
+def row_solid(team_color, row_h, row_w):
     r, g, b = team_color
-    xs    = np.arange(row_w, dtype=np.float32)
-    alpha = np.clip((1 - xs / (row_w * fade)) * 210, 0, 210).astype(np.uint8)
-    arr   = np.zeros((row_h, row_w, 4), dtype=np.uint8)
-    arr[:, :, 0] = r
-    arr[:, :, 1] = g
-    arr[:, :, 2] = b
-    arr[:, :, 3] = alpha[np.newaxis, :]
+    arr = np.full((row_h, row_w, 4), (r, g, b, 255), dtype=np.uint8)
     return Image.fromarray(arr, "RGBA")
 
 # ── Data ───────────────────────────────────────────────────────────────────────
@@ -210,9 +204,8 @@ def build(players, output=None):
         ry = y + i * ROW_H
         tc = TEAM_COLORS.get(p["team"], (55, 55, 75))
 
-        # Gradient background
-        canvas.paste(row_gradient(tc, ROW_H, W), (0, ry),
-                     row_gradient(tc, ROW_H, W))
+        # Solid team color background
+        canvas.paste(row_solid(tc, ROW_H, W), (0, ry))
 
         # Divider line between rows
         if i > 0:
