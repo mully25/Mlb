@@ -1,0 +1,33 @@
+name: Update MLB Graphics Daily
+
+on:
+  schedule:
+    - cron: '0 14 * * *'  # 10am ET every day
+  workflow_dispatch:        # allow manual trigger from GitHub
+
+jobs:
+  update-graphics:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests pillow numpy pandas python-dotenv
+
+      - name: Generate graphics
+        run: python3 graphic.py
+
+      - name: Commit and push updated graphics
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add hitting/ pitching/
+          git diff --staged --quiet || git commit -m "Update graphics $(date +'%Y-%m-%d')"
+          git push
