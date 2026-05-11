@@ -650,9 +650,12 @@ def build(players, stat_key, prev_ranks=None, output=None):
                 (BADGE_CX + TRI, ty),
             ], fill=(*badge_color, 255))
         else:
-            bw = int(d.textlength(badge_txt, font=f_badge))
-            bh = f_badge.getbbox(badge_txt)[3]
-            put(d, badge_txt, BADGE_CX - bw // 2, cy - bh // 2, f_badge, badge_color)
+            # Draw a solid rectangle dash instead of text for better visibility
+            dw, dh = 28, 4
+            d.rectangle([
+                (BADGE_CX - dw // 2, cy - dh // 2),
+                (BADGE_CX + dw // 2, cy + dh // 2),
+            ], fill=(*badge_color, 255))
 
     canvas.convert("RGB").save(output, "PNG")
     print(f"  Saved → {output}")
