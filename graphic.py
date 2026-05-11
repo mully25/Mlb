@@ -648,11 +648,14 @@ def build(players, stat_key, prev_ranks=None, output=None):
                 (BADGE_CX + TRI,   ty),
             ], fill=(*badge_color, 255))
         else:
-            # Solid rectangle dash, centered at cy
+            # Align dash to the visual center of where a number would render
+            bb = f_badge.getbbox("5")
+            bh = bb[3] - bb[1]
+            my = cy - bh // 2 + (bb[1] + bb[3]) // 2
             dw, dh = 28, 4
             d.rectangle([
-                (BADGE_CX - dw // 2, cy - dh // 2),
-                (BADGE_CX + dw // 2, cy + dh // 2),
+                (BADGE_CX - dw // 2, my - dh // 2),
+                (BADGE_CX + dw // 2, my + dh // 2),
             ], fill=(*badge_color, 255))
 
     canvas.convert("RGB").save(output, "PNG")
