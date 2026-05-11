@@ -308,6 +308,8 @@ def _fetch_bref_war_top10(bref_type, games):
     """Fetch WAR from Baseball Reference war_daily_{bat|pit}.txt and join with bdfed metadata."""
     url = f"https://www.baseball-reference.com/data/war_daily_{bref_type}.txt"
     r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=20)
+    if not r.text.strip():
+        raise ValueError(f"Baseball Reference returned empty response for {bref_type}")
     df = pd.read_csv(io.StringIO(r.text), on_bad_lines="skip", engine="python")
     df = df[df["year_ID"] == 2026].copy()
     df["mlb_ID"] = pd.to_numeric(df["mlb_ID"], errors="coerce")
@@ -582,14 +584,24 @@ def build(players, stat_key, output=None):
 if __name__ == "__main__":
     keys = sys.argv[1:] if len(sys.argv) > 1 else list(STAT_CONFIG.keys())
 
+    failed = []
     for stat_key in keys:
         if stat_key not in STAT_CONFIG:
             print(f"Unknown stat: {stat_key}. Options: {list(STAT_CONFIG.keys())}")
             continue
         print(f"\n{'─'*40}")
         print(f"Fetching {STAT_CONFIG[stat_key]['title']}…")
-        players = fetch_top10(stat_key)
+        try:
+            players = fetch_top10(stat_key)
+        except Exception as e:
+            print(f"  ERROR fetching {stat_key}: {e}")
+            failed.append(stat_key)
+            continue
         for p in players:
             print(f"  {p['name']:<25}  {STAT_CONFIG[stat_key]['fmt'](p['val']):<8}  ({p['team']})")
         ensure_silos(players)
         build(players, stat_key)
+
+    if failed:
+        print(f"\nWARNING: Failed to generate graphics for: {failed}")
+        sys.exit(1)
