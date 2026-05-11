@@ -1,6 +1,7 @@
 __pycache__/
 *.pyc
 *.pyo
-_cache/
+_cache/*
+!_cache/rankings.json
 .env
 tiktok_token.json

@@ -5,7 +5,7 @@ Usage:
   python3 graphic.py ba          # single stat
   python3 graphic.py             # generate all stats
 """
-import sys, io, os, time, requests
+import sys, io, os, time, json, requests
 import numpy as np
 import pandas as pd
 from PIL import Image, ImageDraw, ImageFont
@@ -18,6 +18,8 @@ BG    = (13, 13, 18)
 WHITE = (255, 255, 255)
 RED   = (220, 30, 30)
 DIM   = (140, 140, 150)
+GREEN = (50, 205, 50)
+ROSE  = (235, 70, 70)
 
 BASE      = os.path.dirname(os.path.abspath(__file__))
 FONTS_DIR = os.path.join(BASE, "fonts")
@@ -472,7 +474,20 @@ def fetch_savant_expected(player_type):
         return {}
 
 # ── Build ──────────────────────────────────────────────────────────────────────
-def build(players, stat_key, output=None):
+_RANKS_FILE = os.path.join(CACHE_DIR, "rankings.json")
+
+def load_prev_ranks():
+    if not os.path.exists(_RANKS_FILE):
+        return {}
+    with open(_RANKS_FILE) as f:
+        return json.load(f)
+
+def save_ranks(rankings):
+    with open(_RANKS_FILE, "w") as f:
+        json.dump(rankings, f)
+
+
+def build(players, stat_key, prev_ranks=None, output=None):
     cfg = STAT_CONFIG[stat_key]
     if output is None:
         folder = cfg["folder"]
@@ -510,6 +525,12 @@ def build(players, stat_key, output=None):
     f_last  = font("OpenSans-ExtraBold.ttf", 44)
     f_stat  = font("OpenSans-ExtraBold.ttf", 52)
     f_sec   = font("OpenSans-Semibold.ttf", 22)
+    f_badge = font("OpenSans-Bold.ttf", 22)
+
+    # Fixed right-side column: rank-change badge lives here, stat floats left of it
+    BADGE_W  = 76   # px reserved on the far right for the change indicator
+    STAT_R   = W - 16 - BADGE_W - 8   # right edge of the stat value
+    BADGE_CX = W - 16 - BADGE_W // 2  # center x of the badge column
 
     for i, p in enumerate(players):
         ry = y + i * ROW_H
@@ -565,12 +586,70 @@ def build(players, stat_key, output=None):
             stat_blk_h = f_stat.getbbox(stat_str)[3] + 6 + f_sec.getbbox(sec_str)[3]
             sy         = cy - stat_blk_h // 2
             sw         = int(d.textlength(stat_str, font=f_stat))
-            put(d, stat_str, W - 48 - sw, sy, f_stat, WHITE)
+            put(d, stat_str, STAT_R - sw, sy, f_stat, WHITE)
             xw = int(d.textlength(sec_str, font=f_sec))
-            put(d, sec_str, W - 48 - xw, sy + f_stat.getbbox(stat_str)[3] + 4, f_sec, WHITE)
+            put(d, sec_str, STAT_R - xw, sy + f_stat.getbbox(stat_str)[3] + 4, f_sec, WHITE)
         else:
             sw = int(d.textlength(stat_str, font=f_stat))
-            put(d, stat_str, W - 48 - sw, cy - f_stat.getbbox(stat_str)[3] // 2, f_stat, WHITE)
+            put(d, stat_str, STAT_R - sw, cy - f_stat.getbbox(stat_str)[3] // 2, f_stat, WHITE)
+
+        # Rank-change badge
+        pid       = str(p["player_id"])
+        cur_rank  = i + 1
+        prev_rank = (prev_ranks or {}).get(pid)
+
+        if prev_rank is None:
+            badge_txt   = "NR"
+            badge_color = DIM
+            arrow_dir   = None
+        elif prev_rank == cur_rank:
+            badge_txt   = "—"
+            badge_color = DIM
+            arrow_dir   = None
+        elif prev_rank > cur_rank:          # lower number = higher = climbed
+            delta       = prev_rank - cur_rank
+            badge_txt   = str(delta)
+            badge_color = GREEN
+            arrow_dir   = "up"
+        else:
+            delta       = cur_rank - prev_rank
+            badge_txt   = str(delta)
+            badge_color = ROSE
+            arrow_dir   = "down"
+
+        TRI = 7   # triangle half-width
+        tri_gap = 4
+
+        if arrow_dir == "up":
+            # upward triangle above the number
+            bw  = int(d.textlength(badge_txt, font=f_badge))
+            bh  = f_badge.getbbox(badge_txt)[3]
+            blk = TRI * 2 + tri_gap + bh
+            bty = cy - blk // 2
+            tx  = BADGE_CX
+            d.polygon([
+                (tx, bty),
+                (tx - TRI, bty + TRI * 2),
+                (tx + TRI, bty + TRI * 2),
+            ], fill=(*badge_color, 255))
+            put(d, badge_txt, tx - bw // 2, bty + TRI * 2 + tri_gap, f_badge, badge_color)
+        elif arrow_dir == "down":
+            # number above downward triangle
+            bw  = int(d.textlength(badge_txt, font=f_badge))
+            bh  = f_badge.getbbox(badge_txt)[3]
+            blk = bh + tri_gap + TRI * 2
+            bty = cy - blk // 2
+            put(d, badge_txt, BADGE_CX - bw // 2, bty, f_badge, badge_color)
+            ty  = bty + bh + tri_gap
+            d.polygon([
+                (BADGE_CX, ty + TRI * 2),
+                (BADGE_CX - TRI, ty),
+                (BADGE_CX + TRI, ty),
+            ], fill=(*badge_color, 255))
+        else:
+            bw = int(d.textlength(badge_txt, font=f_badge))
+            bh = f_badge.getbbox(badge_txt)[3]
+            put(d, badge_txt, BADGE_CX - bw // 2, cy - bh // 2, f_badge, badge_color)
 
     canvas.convert("RGB").save(output, "PNG")
     print(f"  Saved → {output}")
@@ -580,7 +659,10 @@ def build(players, stat_key, output=None):
 if __name__ == "__main__":
     keys = sys.argv[1:] if len(sys.argv) > 1 else list(STAT_CONFIG.keys())
 
+    all_prev   = load_prev_ranks()
+    today_ranks = {}
     failed = []
+
     for stat_key in keys:
         if stat_key not in STAT_CONFIG:
             print(f"Unknown stat: {stat_key}. Options: {list(STAT_CONFIG.keys())}")
@@ -596,7 +678,13 @@ if __name__ == "__main__":
         for p in players:
             print(f"  {p['name']:<25}  {STAT_CONFIG[stat_key]['fmt'](p['val']):<8}  ({p['team']})")
         ensure_silos(players)
-        build(players, stat_key)
+
+        prev_ranks = all_prev.get(stat_key, {})
+        build(players, stat_key, prev_ranks=prev_ranks)
+
+        today_ranks[stat_key] = {str(p["player_id"]): i + 1 for i, p in enumerate(players)}
+
+    save_ranks({**all_prev, **today_ranks})
 
     if failed:
         print(f"\nWARNING: Failed to generate graphics for: {failed}")
