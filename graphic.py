@@ -600,11 +600,11 @@ def build(players, stat_key, prev_ranks=None, output=None):
 
         if prev_rank is None:
             badge_txt   = "NR"
-            badge_color = DIM
+            badge_color = WHITE
             arrow_dir   = None
         elif prev_rank == cur_rank:
             badge_txt   = "—"
-            badge_color = DIM
+            badge_color = WHITE
             arrow_dir   = None
         elif prev_rank > cur_rank:          # lower number = higher = climbed
             delta       = prev_rank - cur_rank
