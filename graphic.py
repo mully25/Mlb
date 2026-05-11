@@ -359,6 +359,9 @@ def fetch_top10(stat_key):
            f"?leaderCategories={mlb_cat}&season=2026&leaderGameTypes=R"
            f"&limit=10&statGroup={group}&hydrate=person,team")
     data = requests.get(url, headers=hdrs, timeout=15).json()
+    if not data.get("leagueLeaders"):
+        time.sleep(3)
+        data = requests.get(url, headers=hdrs, timeout=15).json()
     leaders = data["leagueLeaders"][0]["leaders"]
 
     rows = []
