@@ -624,33 +624,31 @@ def build(players, stat_key, prev_ranks=None, output=None):
         tri_gap = 4
 
         if arrow_dir == "up":
-            # upward triangle above the number
-            bw  = int(d.textlength(badge_txt, font=f_badge))
-            bh  = f_badge.getbbox(badge_txt)[3]
-            blk = TRI * 2 + tri_gap + bh
-            bty = cy - blk // 2
-            tx  = BADGE_CX
+            # number centered at cy, triangle sits above it
+            bw = int(d.textlength(badge_txt, font=f_badge))
+            bh = f_badge.getbbox(badge_txt)[3] - f_badge.getbbox(badge_txt)[1]
+            ny = cy - bh // 2
+            put(d, badge_txt, BADGE_CX - bw // 2, ny, f_badge, badge_color)
+            ty = ny - tri_gap - TRI * 2
             d.polygon([
-                (tx, bty),
-                (tx - TRI, bty + TRI * 2),
-                (tx + TRI, bty + TRI * 2),
+                (BADGE_CX,         ty),
+                (BADGE_CX - TRI,   ty + TRI * 2),
+                (BADGE_CX + TRI,   ty + TRI * 2),
             ], fill=(*badge_color, 255))
-            put(d, badge_txt, tx - bw // 2, bty + TRI * 2 + tri_gap, f_badge, badge_color)
         elif arrow_dir == "down":
-            # number above downward triangle
-            bw  = int(d.textlength(badge_txt, font=f_badge))
-            bh  = f_badge.getbbox(badge_txt)[3]
-            blk = bh + tri_gap + TRI * 2
-            bty = cy - blk // 2
-            put(d, badge_txt, BADGE_CX - bw // 2, bty, f_badge, badge_color)
-            ty  = bty + bh + tri_gap
+            # number centered at cy, triangle sits below it
+            bw = int(d.textlength(badge_txt, font=f_badge))
+            bh = f_badge.getbbox(badge_txt)[3] - f_badge.getbbox(badge_txt)[1]
+            ny = cy - bh // 2
+            put(d, badge_txt, BADGE_CX - bw // 2, ny, f_badge, badge_color)
+            ty = ny + bh + tri_gap
             d.polygon([
-                (BADGE_CX, ty + TRI * 2),
-                (BADGE_CX - TRI, ty),
-                (BADGE_CX + TRI, ty),
+                (BADGE_CX,         ty + TRI * 2),
+                (BADGE_CX - TRI,   ty),
+                (BADGE_CX + TRI,   ty),
             ], fill=(*badge_color, 255))
         else:
-            # Draw a solid rectangle dash instead of text for better visibility
+            # Solid rectangle dash, centered at cy
             dw, dh = 28, 4
             d.rectangle([
                 (BADGE_CX - dw // 2, cy - dh // 2),
