@@ -62,10 +62,6 @@ STAT_CONFIG = {
              "source": "bdfed_computed_fip"},
     "baa":  {"title": "BAA LEADERS",             "group": "pitching", "mlb_cat": "battingAverage",             "rank": "smallest", "fmt": _avg, "folder": "pitching",
              "secondary": {"label": "xBA",   "col": "est_ba",   "type": "pitcher"}},
-    "war_b":{"title": "BATTING WAR LEADERS",     "group": "hitting",  "rank": "largest",  "fmt": _f1,  "folder": "hitting",
-             "source": "bref_war", "bref_type": "bat"},
-    "war_p":{"title": "PITCHING WAR LEADERS",    "group": "pitching", "rank": "largest",  "fmt": _f1,  "folder": "pitching",
-             "source": "bref_war", "bref_type": "pitch"},
 }
 
 # ── Team hat colors ────────────────────────────────────────────────────────────
