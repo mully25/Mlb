@@ -602,7 +602,7 @@ def build(players, stat_key, prev_ranks=None, output=None):
         prev_rank = (prev_ranks or {}).get(pid)
 
         if prev_rank is None:
-            badge_txt   = "NR"
+            badge_txt   = "—"
             badge_color = WHITE
             arrow_dir   = None
         elif prev_rank == cur_rank:
