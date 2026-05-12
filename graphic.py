@@ -171,18 +171,9 @@ def get_silo(pid):
         f"https://img.mlbstatic.com/mlb-photos/image/upload/w_1000,q_auto:best/v1/people/{pid}/headshot/silo/current",
         f"silo_{pid}.png")
 
-# Teams whose ESPN logo doesn't look good — use an alternate source
-LOGO_URL_OVERRIDE = {
-    "stl": ("https://midfield.mlbstatic.com/v1/team/138/spots/500", "logo_alt_stl.png"),
-}
-
 def get_logo(team_abbrev):
     espn = ESPN_ABBR.get(team_abbrev, team_abbrev.lower())
-    if espn in LOGO_URL_OVERRIDE:
-        url, cache_name = LOGO_URL_OVERRIDE[espn]
-        img = fetch_img(url, cache_name)
-    else:
-        img = fetch_img(
+    img = fetch_img(
             f"https://a.espncdn.com/i/teamlogos/mlb/500-dark/{espn}.png",
             f"logo_cap_{espn}.png")
     if img is None:
