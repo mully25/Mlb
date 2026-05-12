@@ -74,7 +74,7 @@ TEAM_COLORS = {
     "Boston Red Sox":        ( 12,  35,  64),
     "Chicago Cubs":          ( 14,  51, 134),
     "Chicago White Sox":     ( 39,  37,  31),
-    "Cincinnati Reds":       ( 95,   0,  18),
+    "Cincinnati Reds":       (198,   1,  31),
     "Cleveland Guardians":   (  0,  56,  93),
     "Colorado Rockies":      ( 51,   0, 111),
     "Detroit Tigers":        ( 12,  35,  64),
