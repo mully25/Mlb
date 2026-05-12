@@ -102,7 +102,8 @@ TEAM_COLORS = {
 
 # Teams whose logo should be recolored to a solid color (R, G, B)
 LOGO_TINT = {
-    "Cincinnati Reds": (255, 255, 255),
+    "Cincinnati Reds":    (255, 255, 255),
+    "St. Louis Cardinals": (255, 255, 255),
 }
 
 LOGO_OUTLINE = set()
