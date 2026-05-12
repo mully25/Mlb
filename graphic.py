@@ -91,7 +91,7 @@ TEAM_COLORS = {
     "Philadelphia Phillies": (232,  24,  40),   # #E81828
     "Pittsburgh Pirates":    ( 39,  37,  31),   # #27251F
     "San Diego Padres":      ( 47,  36,  29),   # #2F241D
-    "San Francisco Giants":  (253,  90,  30),   # #FD5A1E
+    "San Francisco Giants":  ( 55,  28,   0),
     "Seattle Mariners":      ( 12,  44,  86),   # #0C2C56
     "St. Louis Cardinals":   (196,  30,  58),   # #C41E3A
     "Tampa Bay Rays":        (  9,  44,  92),   # #092C5C
@@ -102,11 +102,10 @@ TEAM_COLORS = {
 
 # Teams whose logo should be recolored to a solid color (R, G, B)
 LOGO_TINT = {
-    "Cincinnati Reds":      (255, 255, 255),
-    "San Francisco Giants": (210,  65,   0),   # darker orange so it reads against the bright bg
+    "Cincinnati Reds": (255, 255, 255),
 }
 
-LOGO_OUTLINE = {"San Francisco Giants"}
+LOGO_OUTLINE = set()
 
 ESPN_ABBR = {
     "AZ": "ari", "ATL": "atl", "BAL": "bal", "BOS": "bos",
@@ -141,24 +140,15 @@ def outline_logo(img, thickness=4):
     return Image.fromarray(out, "RGBA")
 
 def tint_logo(img, color):
-    """
-    Extract the warm/orange outline pixels, fill their interior, then
-    recolor to `color`. Produces a clean solid shape without the fat
-    blue-letter layer.
-    """
-    from scipy.ndimage import binary_fill_holes
+    """Replace all visible pixels with `color`, preserving alpha."""
     tr, tg, tb = color
     arr = np.array(img, dtype=np.uint8)
-    r, g, b, a = arr[...,0].astype(int), arr[...,1].astype(int), arr[...,2].astype(int), arr[...,3]
-    # Orange pixels: red dominates over blue
-    orange_mask = (r - b > 60) & (a > 10)
-    # Fill holes inside the orange outline to get a solid shape
-    filled = binary_fill_holes(orange_mask)
+    mask = arr[..., 3] > 50
     out = np.zeros_like(arr)
-    out[filled, 0] = tr
-    out[filled, 1] = tg
-    out[filled, 2] = tb
-    out[filled, 3] = 255
+    out[mask, 0] = tr
+    out[mask, 1] = tg
+    out[mask, 2] = tb
+    out[mask, 3] = 255
     return Image.fromarray(out, "RGBA")
 
 def fetch_img(url, cache_key):
