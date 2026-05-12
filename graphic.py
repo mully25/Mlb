@@ -537,12 +537,10 @@ def build(players, stat_key, prev_ranks=None, output=None):
     f_last  = font("OpenSans-ExtraBold.ttf", 44)
     f_stat  = font("OpenSans-ExtraBold.ttf", 52)
     f_sec   = font("OpenSans-Semibold.ttf", 22)
-    f_badge = font("OpenSans-Bold.ttf", 22)
+    f_badge = font("OpenSans-Bold.ttf", 32)
 
-    # Fixed right-side column: rank-change badge lives here, stat floats left of it
-    BADGE_W  = 76   # px reserved on the far right for the change indicator
-    STAT_R   = W - 16 - BADGE_W - 8   # right edge of the stat value
-    BADGE_CX = W - 16 - BADGE_W // 2  # center x of the badge column
+    # Stat right edge; badge (arrow + number) appears inline to its right
+    STAT_R = W - 200   # right edge of the stat value text
 
     for i, p in enumerate(players):
         ry = y + i * ROW_H
@@ -631,42 +629,37 @@ def build(players, stat_key, prev_ranks=None, output=None):
             badge_color = ROSE
             arrow_dir   = "down"
 
-        TRI = 7   # triangle half-width
-        tri_gap = 4
+        TRI       = 14   # triangle half-width/height
+        ARROW_GAP = 14   # gap between stat right edge and arrow
+        NUM_GAP   = 8    # gap between arrow right edge and number
+
+        arrow_cx = STAT_R + ARROW_GAP + TRI   # horizontal center of arrow
+        num_x    = arrow_cx + TRI + NUM_GAP   # left edge of number text
 
         if arrow_dir == "up":
-            # number centered at cy, triangle sits above it
-            bw = int(d.textlength(badge_txt, font=f_badge))
-            bh = f_badge.getbbox(badge_txt)[3] - f_badge.getbbox(badge_txt)[1]
-            ny = cy - bh // 2
-            put(d, badge_txt, BADGE_CX - bw // 2, ny, f_badge, badge_color)
-            ty = ny - tri_gap - TRI * 2
             d.polygon([
-                (BADGE_CX,         ty),
-                (BADGE_CX - TRI,   ty + TRI * 2),
-                (BADGE_CX + TRI,   ty + TRI * 2),
+                (arrow_cx,         cy - TRI),
+                (arrow_cx - TRI,   cy + TRI),
+                (arrow_cx + TRI,   cy + TRI),
             ], fill=(*badge_color, 255))
-        elif arrow_dir == "down":
-            # number centered at cy, triangle sits below it
-            bw = int(d.textlength(badge_txt, font=f_badge))
-            bh = f_badge.getbbox(badge_txt)[3] - f_badge.getbbox(badge_txt)[1]
-            ny = cy - bh // 2
-            put(d, badge_txt, BADGE_CX - bw // 2, ny, f_badge, badge_color)
-            ty = ny + bh + tri_gap
-            d.polygon([
-                (BADGE_CX,         ty + TRI * 2),
-                (BADGE_CX - TRI,   ty),
-                (BADGE_CX + TRI,   ty),
-            ], fill=(*badge_color, 255))
-        else:
-            # Align dash to the visual center of where a number would render
-            bb = f_badge.getbbox("5")
+            bb = f_badge.getbbox(badge_txt)
             bh = bb[3] - bb[1]
-            my = cy - bh // 2 + (bb[1] + bb[3]) // 2
-            dw, dh = 28, 4
+            put(d, badge_txt, num_x, cy - bh // 2, f_badge, badge_color)
+        elif arrow_dir == "down":
+            d.polygon([
+                (arrow_cx,         cy + TRI),
+                (arrow_cx - TRI,   cy - TRI),
+                (arrow_cx + TRI,   cy - TRI),
+            ], fill=(*badge_color, 255))
+            bb = f_badge.getbbox(badge_txt)
+            bh = bb[3] - bb[1]
+            put(d, badge_txt, num_x, cy - bh // 2, f_badge, badge_color)
+        else:
+            # Horizontal dash centered at cy, aligned with where the arrow sits
+            dw, dh = 28, 5
             d.rectangle([
-                (BADGE_CX - dw // 2, my - dh // 2),
-                (BADGE_CX + dw // 2, my + dh // 2),
+                (arrow_cx - dw // 2, cy - dh // 2),
+                (arrow_cx + dw // 2, cy + dh // 2),
             ], fill=(*badge_color, 255))
 
     canvas.convert("RGB").save(output, "PNG")
