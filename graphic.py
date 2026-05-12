@@ -102,7 +102,8 @@ TEAM_COLORS = {
 
 # Teams whose logo should be recolored to a solid color (R, G, B)
 LOGO_TINT = {
-    "Cincinnati Reds": (255, 255, 255),
+    "Cincinnati Reds":      (255, 255, 255),
+    "San Francisco Giants": (210,  65,   0),   # darker orange so it reads against the bright bg
 }
 
 LOGO_OUTLINE = {"San Francisco Giants"}
