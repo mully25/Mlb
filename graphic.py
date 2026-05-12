@@ -538,7 +538,7 @@ def build(players, stat_key, prev_ranks=None, output=None):
     f_stat  = font("OpenSans-ExtraBold.ttf", 52)
     f_sec   = font("OpenSans-Semibold.ttf", 22)
 
-    STAT_R = W - 20   # stat value flush to right margin
+    STAT_R = W - 60
 
     for i, p in enumerate(players):
         ry = y + i * ROW_H
