@@ -52,6 +52,8 @@ STAT_CONFIG = {
     "hits": {"title": "HIT LEADERS",              "group": "hitting",  "mlb_cat": "hits",                      "rank": "largest",  "fmt": _int, "folder": "hitting"},
     "sb":   {"title": "STOLEN BASE LEADERS",      "group": "hitting",  "mlb_cat": "stolenBases",               "rank": "largest",  "fmt": _int, "folder": "hitting"},
     "r":    {"title": "RUNS LEADERS",             "group": "hitting",  "mlb_cat": "runs",                      "rank": "largest",  "fmt": _int, "folder": "hitting"},
+    "hwar": {"title": "POSITION PLAYER WAR LEADERS", "group": "hitting", "rank": "largest", "fmt": _f1, "folder": "hitting",
+             "source": "bref_war", "bref_type": "bat"},
     # ── pitching ───────────────────────────────────────────────────────────────
     "era":  {"title": "ERA LEADERS",              "group": "pitching", "mlb_cat": "earnedRunAverage",          "rank": "smallest", "fmt": _f2,  "folder": "pitching",
              "secondary": {"label": "xERA",  "col": "xera",     "type": "pitcher"}},
@@ -64,6 +66,8 @@ STAT_CONFIG = {
              "source": "bdfed_computed_fip"},
     "baa":  {"title": "BAA LEADERS",             "group": "pitching", "mlb_cat": "battingAverage",             "rank": "smallest", "fmt": _avg, "folder": "pitching",
              "secondary": {"label": "xBA",   "col": "est_ba",   "type": "pitcher"}},
+    "pwar": {"title": "PITCHER WAR LEADERS",     "group": "pitching", "rank": "largest", "fmt": _f1, "folder": "pitching",
+             "source": "bref_war", "bref_type": "pit"},
 }
 
 # ── Team hat colors ────────────────────────────────────────────────────────────
@@ -330,13 +334,50 @@ def _fetch_fip_top10(games):
     return top10
 
 
-def _fetch_bref_war_top10(bref_type, games):
-    """Fetch WAR from Baseball Reference war_daily_{bat|pit}.txt and join with bdfed metadata."""
+def _download_bref_file(bref_type):
+    """Download one bref WAR file to cache, respecting rate limits."""
+    cache_path = os.path.join(CACHE_DIR, f"bref_war_{bref_type}.txt")
+    needs_fetch = (
+        not os.path.exists(cache_path) or
+        time.time() - os.path.getmtime(cache_path) > 20 * 3600
+    )
+    if not needs_fetch:
+        return
     url = f"https://www.baseball-reference.com/data/war_daily_{bref_type}.txt"
-    r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=20)
-    if not r.text.strip():
-        raise ValueError(f"Baseball Reference returned empty response for {bref_type}")
-    df = pd.read_csv(io.StringIO(r.text), on_bad_lines="skip", engine="python")
+    for attempt in range(4):
+        r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=60)
+        if r.status_code == 200 and r.text.strip() and not r.text.lstrip().startswith("<"):
+            with open(cache_path, "w", encoding="utf-8") as f:
+                f.write(r.text)
+            return
+        wait = 15 * (2 ** attempt)
+        print(f"  bref {bref_type} attempt {attempt+1} got {r.status_code}, retrying in {wait}s…")
+        time.sleep(wait)
+    raise ValueError(f"Baseball Reference blocked after 4 attempts for {bref_type}")
+
+
+def prefetch_bref_cache(keys):
+    """Pre-fetch both bref WAR files upfront with a gap to avoid rate limiting."""
+    types_needed = set()
+    for k in keys:
+        cfg = STAT_CONFIG.get(k, {})
+        if cfg.get("source") == "bref_war":
+            types_needed.add(cfg["bref_type"])
+    for i, bref_type in enumerate(sorted(types_needed)):
+        if i > 0:
+            print("  Waiting 30s before next Baseball Reference request…")
+            time.sleep(30)
+        _download_bref_file(bref_type)
+
+
+def _fetch_bref_war_top10(bref_type, games):
+    """Fetch WAR from locally-cached Baseball Reference data."""
+    cache_path = os.path.join(CACHE_DIR, f"bref_war_{bref_type}.txt")
+    if not os.path.exists(cache_path):
+        _download_bref_file(bref_type)
+    with open(cache_path, encoding="utf-8") as f:
+        text = f.read()
+    df = pd.read_csv(io.StringIO(text), on_bad_lines="skip", engine="python")
     df = df[df["year_ID"] == 2026].copy()
     df["mlb_ID"] = pd.to_numeric(df["mlb_ID"], errors="coerce")
     df = df.dropna(subset=["mlb_ID", "WAR"])
@@ -635,6 +676,7 @@ def build(players, stat_key, prev_ranks=None, output=None):
 if __name__ == "__main__":
     keys = sys.argv[1:] if len(sys.argv) > 1 else list(STAT_CONFIG.keys())
 
+    prefetch_bref_cache(keys)
     all_prev   = load_prev_ranks()
     today_ranks = {}
     failed = []

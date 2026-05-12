@@ -24,7 +24,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install requests pillow numpy pandas python-dotenv
+        run: pip install requests pillow numpy pandas python-dotenv scipy
 
       - name: Generate graphics
         run: python3 graphic.py
