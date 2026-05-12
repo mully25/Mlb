@@ -173,9 +173,19 @@ def get_silo(pid):
 
 def get_logo(team_abbrev):
     espn = ESPN_ABBR.get(team_abbrev, team_abbrev.lower())
-    return fetch_img(
+    img = fetch_img(
         f"https://a.espncdn.com/i/teamlogos/mlb/500-dark/{espn}.png",
         f"logo_cap_{espn}.png")
+    if img is None:
+        return None
+    # Crop transparent padding so every logo scales to the same apparent size
+    arr = np.array(img)
+    mask = arr[..., 3] > 10
+    rows = np.any(mask, axis=1)
+    cols = np.any(mask, axis=0)
+    rmin, rmax = np.where(rows)[0][[0, -1]]
+    cmin, cmax = np.where(cols)[0][[0, -1]]
+    return img.crop((cmin, rmin, cmax + 1, rmax + 1))
 
 def row_solid(team_color, row_h, row_w):
     r, g, b = team_color
