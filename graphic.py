@@ -108,6 +108,11 @@ LOGO_TINT = {
 
 LOGO_OUTLINE = set()
 
+# Erode alpha mask before tinting to thin thick-stroked logos
+LOGO_ERODE = {
+    "St. Louis Cardinals": 6,
+}
+
 ESPN_ABBR = {
     "AZ": "ari", "ATL": "atl", "BAL": "bal", "BOS": "bos",
     "CHC": "chc", "CWS": "chw", "CIN": "cin", "CLE": "cle",
@@ -140,11 +145,14 @@ def outline_logo(img, thickness=4):
     out[border, 3] = 255
     return Image.fromarray(out, "RGBA")
 
-def tint_logo(img, color):
-    """Replace all visible pixels with `color`, preserving alpha."""
+def tint_logo(img, color, erode=0):
+    """Replace all visible pixels with `color`; optionally erode mask first to thin strokes."""
+    from scipy.ndimage import binary_erosion
     tr, tg, tb = color
     arr = np.array(img, dtype=np.uint8)
     mask = arr[..., 3] > 50
+    if erode > 0:
+        mask = binary_erosion(mask, iterations=erode)
     out = np.zeros_like(arr)
     out[mask, 0] = tr
     out[mask, 1] = tg
@@ -573,7 +581,8 @@ def build(players, stat_key, prev_ranks=None, output=None):
         if logo:
             tint = LOGO_TINT.get(p["team"])
             if tint:
-                logo = tint_logo(logo, tint)
+                erode = LOGO_ERODE.get(p["team"], 0)
+                logo = tint_logo(logo, tint, erode=erode)
             if p["team"] in LOGO_OUTLINE:
                 logo = outline_logo(logo, thickness=8)
             logo.thumbnail((LOGO_SZ, LOGO_SZ), Image.LANCZOS)
