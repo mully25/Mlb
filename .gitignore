@@ -3,5 +3,7 @@ __pycache__/
 *.pyo
 _cache/*
 !_cache/rankings.json
+!_cache/bref_war_bat.txt
+!_cache/bref_war_pit.txt
 .env
 tiktok_token.json

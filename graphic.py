@@ -353,6 +353,9 @@ def _download_bref_file(bref_type):
         wait = 15 * (2 ** attempt)
         print(f"  bref {bref_type} attempt {attempt+1} got {r.status_code}, retrying in {wait}s…")
         time.sleep(wait)
+    if os.path.exists(cache_path):
+        print(f"  bref {bref_type}: using stale cache (bref blocked)")
+        return
     raise ValueError(f"Baseball Reference blocked after 4 attempts for {bref_type}")
 
 
