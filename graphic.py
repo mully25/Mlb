@@ -101,7 +101,9 @@ TEAM_COLORS = {
 }
 
 # Teams whose logo should be recolored to a solid color (R, G, B)
-LOGO_TINT = {}
+LOGO_TINT = {
+    "Cincinnati Reds": (255, 255, 255),
+}
 
 ESPN_ABBR = {
     "AZ": "ari", "ATL": "atl", "BAL": "bal", "BOS": "bos",
