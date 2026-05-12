@@ -537,12 +537,8 @@ def build(players, stat_key, prev_ranks=None, output=None):
     f_last  = font("OpenSans-ExtraBold.ttf", 44)
     f_stat  = font("OpenSans-ExtraBold.ttf", 52)
     f_sec   = font("OpenSans-Semibold.ttf", 22)
-    f_badge = font("OpenSans-Bold.ttf", 32)
 
-    # Stat right edge; badge (arrow + number) fills the space to the right margin
-    STAT_R    = W - 250   # right edge of the stat value text
-    BADGE_L   = STAT_R + 16
-    BADGE_R   = W - 20    # right edge of badge zone
+    STAT_R = W - 20   # stat value flush to right margin
 
     for i, p in enumerate(players):
         ry = y + i * ROW_H
@@ -607,87 +603,6 @@ def build(players, stat_key, prev_ranks=None, output=None):
             sw = int(d.textlength(stat_str, font=f_stat))
             put(d, stat_str, STAT_R - sw, cy - f_stat.getbbox(stat_str)[3] // 2, f_stat, WHITE)
 
-        # Rank-change badge
-        pid       = str(p["player_id"])
-        cur_rank  = i + 1
-        prev_rank = (prev_ranks or {}).get(pid)
-
-        if prev_rank is None:
-            badge_txt   = "—"
-            badge_color = WHITE
-            arrow_dir   = None
-        elif prev_rank == cur_rank:
-            badge_txt   = "—"
-            badge_color = WHITE
-            arrow_dir   = None
-        elif prev_rank > cur_rank:          # lower number = higher = climbed
-            delta       = prev_rank - cur_rank
-            badge_txt   = str(delta)
-            badge_color = GREEN
-            arrow_dir   = "up"
-        else:
-            delta       = cur_rank - prev_rank
-            badge_txt   = str(delta)
-            badge_color = ROSE
-            arrow_dir   = "down"
-
-        # Full arrow dimensions
-        HEAD    = 11   # arrowhead half-width at base
-        HEAD_H  = 11   # arrowhead height
-        STEM_W  = 5    # stem width
-        STEM_H  = 16   # stem height
-        NUM_GAP = 10   # gap between arrowhead edge and number
-
-        # Estimate number width to center [arrow + number] in the badge zone
-        if arrow_dir in ("up", "down"):
-            num_w = int(d.textlength(badge_txt, font=f_badge))
-        else:
-            num_w = 0
-        group_w  = HEAD * 2 + (NUM_GAP + num_w if arrow_dir in ("up", "down") else 0)
-        arrow_cx = BADGE_L + (BADGE_R - BADGE_L - group_w) // 2 + HEAD
-        num_x    = arrow_cx + HEAD + NUM_GAP
-
-        if arrow_dir == "up":
-            # Arrowhead points up, stem hangs below
-            tip_y  = cy - (HEAD_H + STEM_H) // 2
-            base_y = tip_y + HEAD_H
-            bot_y  = base_y + STEM_H
-            d.polygon([
-                (arrow_cx,          tip_y),
-                (arrow_cx - HEAD,   base_y),
-                (arrow_cx + HEAD,   base_y),
-            ], fill=(*badge_color, 255))
-            d.rectangle([
-                (arrow_cx - STEM_W // 2, base_y),
-                (arrow_cx + STEM_W // 2, bot_y),
-            ], fill=(*badge_color, 255))
-            bb = f_badge.getbbox(badge_txt)
-            bh = bb[3] - bb[1]
-            put(d, badge_txt, num_x, cy - bh // 2, f_badge, badge_color)
-        elif arrow_dir == "down":
-            # Arrowhead points down, stem rises above
-            tip_y  = cy + (HEAD_H + STEM_H) // 2
-            base_y = tip_y - HEAD_H
-            top_y  = base_y - STEM_H
-            d.polygon([
-                (arrow_cx,          tip_y),
-                (arrow_cx - HEAD,   base_y),
-                (arrow_cx + HEAD,   base_y),
-            ], fill=(*badge_color, 255))
-            d.rectangle([
-                (arrow_cx - STEM_W // 2, top_y),
-                (arrow_cx + STEM_W // 2, base_y),
-            ], fill=(*badge_color, 255))
-            bb = f_badge.getbbox(badge_txt)
-            bh = bb[3] - bb[1]
-            put(d, badge_txt, num_x, cy - bh // 2, f_badge, badge_color)
-        else:
-            dash_cx = BADGE_L + (BADGE_R - BADGE_L) // 2
-            dw, dh = 30, 5
-            d.rectangle([
-                (dash_cx - dw // 2, cy - dh // 2),
-                (dash_cx + dw // 2, cy + dh // 2),
-            ], fill=(*badge_color, 255))
 
     canvas.convert("RGB").save(output, "PNG")
     print(f"  Saved → {output}")
