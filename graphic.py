@@ -91,7 +91,7 @@ TEAM_COLORS = {
     "Philadelphia Phillies": (232,  24,  40),   # #E81828
     "Pittsburgh Pirates":    ( 39,  37,  31),   # #27251F
     "San Diego Padres":      ( 47,  36,  29),   # #2F241D
-    "San Francisco Giants":  ( 55,  28,   0),   # original
+    "San Francisco Giants":  (253,  90,  30),   # #FD5A1E
     "Seattle Mariners":      ( 12,  44,  86),   # #0C2C56
     "St. Louis Cardinals":   (196,  30,  58),   # #C41E3A
     "Tampa Bay Rays":        (  9,  44,  92),   # #092C5C
@@ -105,7 +105,7 @@ LOGO_TINT = {
     "Cincinnati Reds": (255, 255, 255),
 }
 
-LOGO_OUTLINE = set()
+LOGO_OUTLINE = {"San Francisco Giants"}
 
 ESPN_ABBR = {
     "AZ": "ari", "ATL": "atl", "BAL": "bal", "BOS": "bos",
