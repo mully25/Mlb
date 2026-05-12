@@ -577,7 +577,7 @@ def build(players, stat_key, prev_ranks=None, output=None):
             if tint:
                 logo = tint_logo(logo, tint)
             if p["team"] in LOGO_OUTLINE:
-                logo = outline_logo(logo)
+                logo = outline_logo(logo, thickness=8)
             logo = logo.resize((LOGO_SZ, LOGO_SZ), Image.LANCZOS)
             canvas.paste(logo, (ML + RANK_W, cy - LOGO_SZ // 2), logo)
 
