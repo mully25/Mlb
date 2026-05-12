@@ -539,8 +539,10 @@ def build(players, stat_key, prev_ranks=None, output=None):
     f_sec   = font("OpenSans-Semibold.ttf", 22)
     f_badge = font("OpenSans-Bold.ttf", 32)
 
-    # Stat right edge; badge (arrow + number) appears inline to its right
-    STAT_R = W - 200   # right edge of the stat value text
+    # Stat right edge; badge (arrow + number) fills the space to the right margin
+    STAT_R    = W - 250   # right edge of the stat value text
+    BADGE_L   = STAT_R + 16
+    BADGE_R   = W - 20    # right edge of badge zone
 
     for i, p in enumerate(players):
         ry = y + i * ROW_H
@@ -629,37 +631,62 @@ def build(players, stat_key, prev_ranks=None, output=None):
             badge_color = ROSE
             arrow_dir   = "down"
 
-        TRI       = 14   # triangle half-width/height
-        ARROW_GAP = 14   # gap between stat right edge and arrow
-        NUM_GAP   = 8    # gap between arrow right edge and number
+        # Full arrow dimensions
+        HEAD    = 11   # arrowhead half-width at base
+        HEAD_H  = 11   # arrowhead height
+        STEM_W  = 5    # stem width
+        STEM_H  = 16   # stem height
+        NUM_GAP = 10   # gap between arrowhead edge and number
 
-        arrow_cx = STAT_R + ARROW_GAP + TRI   # horizontal center of arrow
-        num_x    = arrow_cx + TRI + NUM_GAP   # left edge of number text
+        # Estimate number width to center [arrow + number] in the badge zone
+        if arrow_dir in ("up", "down"):
+            num_w = int(d.textlength(badge_txt, font=f_badge))
+        else:
+            num_w = 0
+        group_w  = HEAD * 2 + (NUM_GAP + num_w if arrow_dir in ("up", "down") else 0)
+        arrow_cx = BADGE_L + (BADGE_R - BADGE_L - group_w) // 2 + HEAD
+        num_x    = arrow_cx + HEAD + NUM_GAP
 
         if arrow_dir == "up":
+            # Arrowhead points up, stem hangs below
+            tip_y  = cy - (HEAD_H + STEM_H) // 2
+            base_y = tip_y + HEAD_H
+            bot_y  = base_y + STEM_H
             d.polygon([
-                (arrow_cx,         cy - TRI),
-                (arrow_cx - TRI,   cy + TRI),
-                (arrow_cx + TRI,   cy + TRI),
+                (arrow_cx,          tip_y),
+                (arrow_cx - HEAD,   base_y),
+                (arrow_cx + HEAD,   base_y),
+            ], fill=(*badge_color, 255))
+            d.rectangle([
+                (arrow_cx - STEM_W // 2, base_y),
+                (arrow_cx + STEM_W // 2, bot_y),
             ], fill=(*badge_color, 255))
             bb = f_badge.getbbox(badge_txt)
             bh = bb[3] - bb[1]
             put(d, badge_txt, num_x, cy - bh // 2, f_badge, badge_color)
         elif arrow_dir == "down":
+            # Arrowhead points down, stem rises above
+            tip_y  = cy + (HEAD_H + STEM_H) // 2
+            base_y = tip_y - HEAD_H
+            top_y  = base_y - STEM_H
             d.polygon([
-                (arrow_cx,         cy + TRI),
-                (arrow_cx - TRI,   cy - TRI),
-                (arrow_cx + TRI,   cy - TRI),
+                (arrow_cx,          tip_y),
+                (arrow_cx - HEAD,   base_y),
+                (arrow_cx + HEAD,   base_y),
+            ], fill=(*badge_color, 255))
+            d.rectangle([
+                (arrow_cx - STEM_W // 2, top_y),
+                (arrow_cx + STEM_W // 2, base_y),
             ], fill=(*badge_color, 255))
             bb = f_badge.getbbox(badge_txt)
             bh = bb[3] - bb[1]
             put(d, badge_txt, num_x, cy - bh // 2, f_badge, badge_color)
         else:
-            # Horizontal dash centered at cy, aligned with where the arrow sits
-            dw, dh = 28, 5
+            dash_cx = BADGE_L + (BADGE_R - BADGE_L) // 2
+            dw, dh = 30, 5
             d.rectangle([
-                (arrow_cx - dw // 2, cy - dh // 2),
-                (arrow_cx + dw // 2, cy + dh // 2),
+                (dash_cx - dw // 2, cy - dh // 2),
+                (dash_cx + dw // 2, cy + dh // 2),
             ], fill=(*badge_color, 255))
 
     canvas.convert("RGB").save(output, "PNG")
