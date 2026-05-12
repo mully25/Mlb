@@ -69,35 +69,35 @@ STAT_CONFIG = {
 # ── Team hat colors ────────────────────────────────────────────────────────────
 TEAM_COLORS = {
     "Arizona Diamondbacks":  (167,  25,  48),
-    "Atlanta Braves":        ( 19,  39,  79),
-    "Baltimore Orioles":     (223,  70,   1),
-    "Boston Red Sox":        ( 12,  35,  64),
-    "Chicago Cubs":          ( 14,  51, 134),
-    "Chicago White Sox":     ( 39,  37,  31),
-    "Cincinnati Reds":       (198,   1,  31),
-    "Cleveland Guardians":   (  0,  56,  93),
-    "Colorado Rockies":      ( 51,   0, 111),
-    "Detroit Tigers":        ( 12,  35,  64),
-    "Houston Astros":        (  0,  45,  98),
-    "Kansas City Royals":    (  0,  70, 135),
-    "Los Angeles Angels":    (186,   0,  33),
-    "Los Angeles Dodgers":   (  0,  90, 156),
-    "Miami Marlins":         (  0, 163, 224),
-    "Milwaukee Brewers":     ( 18,  40,  75),
-    "Minnesota Twins":       (  0,  43,  92),
-    "New York Mets":         (  0,  45, 114),
-    "New York Yankees":      ( 12,  35,  64),
-    "Athletics":             (  0,  56,  49),
-    "Philadelphia Phillies": (232,  24,  40),
-    "Pittsburgh Pirates":    ( 55,  42,   0),
-    "San Diego Padres":      ( 47,  36,  29),
-    "San Francisco Giants":  ( 55,  28,   0),
-    "Seattle Mariners":      ( 12,  44,  86),
-    "St. Louis Cardinals":   (196,  30,  58),
-    "Tampa Bay Rays":        ( 10,  52, 104),
-    "Texas Rangers":         (  0,  50, 120),
-    "Toronto Blue Jays":     ( 19,  74, 142),
-    "Washington Nationals":  (171,   0,   3),
+    "Atlanta Braves":        ( 19,  39,  79),   # #13274F
+    "Baltimore Orioles":     (223,  70,   1),   # #DF4601
+    "Boston Red Sox":        ( 12,  35,  64),   # #0C2340
+    "Chicago Cubs":          ( 14,  51, 134),   # #0E3386
+    "Chicago White Sox":     ( 39,  37,  31),   # #27251F
+    "Cincinnati Reds":       (198,   1,  31),   # #C6011F
+    "Cleveland Guardians":   (  0,  43,  92),   # #002B5C
+    "Colorado Rockies":      ( 51,   0, 111),   # #33006F
+    "Detroit Tigers":        (  0,  30,  98),   # #001E62
+    "Houston Astros":        (  0,  45,  98),   # #002D62
+    "Kansas City Royals":    (  0,  70, 135),   # #004687
+    "Los Angeles Angels":    (186,   0,  33),   # #BA0021
+    "Los Angeles Dodgers":   (  0,  90, 156),   # #005A9C
+    "Miami Marlins":         (  0, 119, 200),   # #0077C8
+    "Milwaukee Brewers":     ( 18,  40,  75),   # #12264B
+    "Minnesota Twins":       (  0,  43,  92),   # #002B5C
+    "New York Mets":         (  0,  45, 114),   # #002D72
+    "New York Yankees":      ( 19,  36,  72),   # #132448
+    "Athletics":             (  0,  56,  49),   # #003831
+    "Philadelphia Phillies": (232,  24,  40),   # #E81828
+    "Pittsburgh Pirates":    ( 39,  37,  31),   # #27251F
+    "San Diego Padres":      ( 47,  36,  29),   # #2F241D
+    "San Francisco Giants":  (253,  90,  30),   # #FD5A1E
+    "Seattle Mariners":      ( 12,  44,  86),   # #0C2C56
+    "St. Louis Cardinals":   (196,  30,  58),   # #C41E3A
+    "Tampa Bay Rays":        (  9,  44,  92),   # #092C5C
+    "Texas Rangers":         (  0,  50, 120),   # #003278
+    "Toronto Blue Jays":     ( 19,  74, 142),   # #134A8E
+    "Washington Nationals":  (171,   0,   3),   # #AB0003
 }
 
 # Teams whose logo should be recolored to a solid color (R, G, B)
