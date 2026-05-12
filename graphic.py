@@ -102,9 +102,10 @@ TEAM_COLORS = {
 
 # Teams whose logo should be recolored to a solid color (R, G, B)
 LOGO_TINT = {
-    "Cincinnati Reds":     (255, 255, 255),
-    "San Francisco Giants": (255, 255, 255),
+    "Cincinnati Reds": (255, 255, 255),
 }
+
+LOGO_OUTLINE = {"San Francisco Giants"}
 
 ESPN_ABBR = {
     "AZ": "ari", "ATL": "atl", "BAL": "bal", "BOS": "bos",
@@ -123,6 +124,20 @@ def font(name, size):
 
 def put(d, text, x, y, fnt, color):
     d.text((x, y), text, font=fnt, fill=(*color, 255))
+
+def outline_logo(img, thickness=4):
+    """Add a white outline around a logo by dilating its alpha mask."""
+    from scipy.ndimage import binary_dilation
+    arr    = np.array(img, dtype=np.uint8)
+    alpha  = arr[..., 3] > 50
+    dilated = binary_dilation(alpha, iterations=thickness)
+    out    = arr.copy()
+    border = dilated & ~alpha
+    out[border, 0] = 255
+    out[border, 1] = 255
+    out[border, 2] = 255
+    out[border, 3] = 255
+    return Image.fromarray(out, "RGBA")
 
 def tint_logo(img, color):
     """
@@ -561,6 +576,8 @@ def build(players, stat_key, prev_ranks=None, output=None):
             tint = LOGO_TINT.get(p["team"])
             if tint:
                 logo = tint_logo(logo, tint)
+            if p["team"] in LOGO_OUTLINE:
+                logo = outline_logo(logo)
             logo = logo.resize((LOGO_SZ, LOGO_SZ), Image.LANCZOS)
             canvas.paste(logo, (ML + RANK_W, cy - LOGO_SZ // 2), logo)
 
