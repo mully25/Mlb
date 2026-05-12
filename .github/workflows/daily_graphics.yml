@@ -36,3 +36,62 @@ jobs:
           git add hitting/ pitching/ _cache/rankings.json
           git diff --staged --quiet || git commit -m "Update graphics $(date +'%Y-%m-%d')"
           git push
+
+      - name: Send today's post to Make.com
+        if: ${{ secrets.MAKE_WEBHOOK_URL != '' }}
+        run: |
+          python3 - <<'EOF'
+          import json, datetime, urllib.request, os
+
+          REPO    = "mully25/Mlb"
+          BRANCH  = "claude/mlb-xwoba-top-10-graphic-LjKzs"
+          RAW     = f"https://raw.githubusercontent.com/{REPO}/{BRANCH}"
+
+          ROTATION = [
+              ("hitting/ba_top10.png",    "Batting Average Leaders 🏆 #MLB #Baseball #Stats"),
+              ("pitching/era_top10.png",  "ERA Leaders 🏆 #MLB #Baseball #Stats"),
+              ("hitting/hr_top10.png",    "Home Run Leaders 🏆 #MLB #Baseball #Stats"),
+              ("pitching/k_top10.png",    "Strikeout Leaders 🏆 #MLB #Baseball #Stats"),
+
+              ("hitting/obp_top10.png",   "On-Base % Leaders 🏆 #MLB #Baseball #Stats"),
+              ("pitching/whip_top10.png", "WHIP Leaders 🏆 #MLB #Baseball #Stats"),
+              ("hitting/rbi_top10.png",   "RBI Leaders 🏆 #MLB #Baseball #Stats"),
+              ("pitching/sv_top10.png",   "Save Leaders 🏆 #MLB #Baseball #Stats"),
+
+              ("hitting/slg_top10.png",   "Slugging % Leaders 🏆 #MLB #Baseball #Stats"),
+              ("pitching/fip_top10.png",  "FIP Leaders 🏆 #MLB #Baseball #Stats"),
+              ("hitting/ops_top10.png",   "OPS Leaders 🏆 #MLB #Baseball #Stats"),
+              ("pitching/k9_top10.png",   "K/9 Leaders 🏆 #MLB #Baseball #Stats"),
+
+              ("hitting/woba_top10.png",  "wOBA Leaders 🏆 #MLB #Baseball #Stats"),
+              ("pitching/baa_top10.png",  "BAA Leaders 🏆 #MLB #Baseball #Stats"),
+              ("hitting/sb_top10.png",    "Stolen Base Leaders 🏆 #MLB #Baseball #Stats"),
+              ("pitching/w_top10.png",    "Win Leaders 🏆 #MLB #Baseball #Stats"),
+
+              ("hitting/hits_top10.png",  "Hit Leaders 🏆 #MLB #Baseball #Stats"),
+              ("pitching/pwar_top10.png", "Pitching WAR Leaders 🏆 #MLB #Baseball #Stats"),
+              ("hitting/r_top10.png",     "Runs Leaders 🏆 #MLB #Baseball #Stats"),
+              ("hitting/hwar_top10.png",  "Batting WAR Leaders 🏆 #MLB #Baseball #Stats"),
+          ]
+
+          day = datetime.date.today().timetuple().tm_yday
+          path, caption = ROTATION[day % len(ROTATION)]
+
+          payload = json.dumps({
+              "path":    path,
+              "url":     f"{RAW}/{path}",
+              "caption": caption,
+              "date":    str(datetime.date.today()),
+          }).encode()
+
+          req = urllib.request.Request(
+              os.environ["MAKE_WEBHOOK_URL"],
+              data=payload,
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+          with urllib.request.urlopen(req, timeout=15) as resp:
+              print(f"Webhook sent ({resp.status}): {path}")
+          EOF
+        env:
+          MAKE_WEBHOOK_URL: ${{ secrets.MAKE_WEBHOOK_URL }}

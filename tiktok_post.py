@@ -38,9 +38,9 @@ ROTATION = [
     ("pitching/w_top10.png",    "Win Leaders 🏆 #MLB #Baseball #Stats"),
 
     ("hitting/hits_top10.png",  "Hit Leaders 🏆 #MLB #Baseball #Stats"),
-    ("pitching/war_p_top10.png","Pitching WAR Leaders 🏆 #MLB #Baseball #Stats"),
+    ("pitching/pwar_top10.png","Pitching WAR Leaders 🏆 #MLB #Baseball #Stats"),
     ("hitting/r_top10.png",     "Runs Leaders 🏆 #MLB #Baseball #Stats"),
-    ("hitting/war_b_top10.png", "Batting WAR Leaders 🏆 #MLB #Baseball #Stats"),
+    ("hitting/hwar_top10.png", "Batting WAR Leaders 🏆 #MLB #Baseball #Stats"),
 ]
 
 CYCLE = 5        # days per full rotation
