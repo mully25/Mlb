@@ -676,6 +676,11 @@ def build(players, stat_key, prev_ranks=None, output=None):
             put(d, stat_str, STAT_R - sw, cy - f_stat.getbbox(stat_str)[3] // 2, f_stat, WHITE)
 
 
+    f_follow = font("OpenSans-Bold.ttf", 30)
+    follow_str = "Follow for daily MLB content"
+    fw = int(d.textlength(follow_str, font=f_follow))
+    d.text(((W - fw) // 2, 1265), follow_str, font=f_follow, fill=(255, 255, 255, 180))
+
     canvas.convert("RGB").save(output, "PNG")
     print(f"  Saved → {output}")
 
