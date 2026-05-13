@@ -587,6 +587,10 @@ def build(players, stat_key, prev_ranks=None, output=None):
     today  = datetime.now(ZoneInfo("America/New_York")).strftime("%m/%d/%Y")
     date_w = int(d.textlength(today, font=f_date))
     put(d, today, (W - date_w) // 2, y, f_date, WHITE)
+
+    f_wm = font("OpenSans-Semibold.ttf", 22)
+    d.text((ML, y + 3), "unclebensarroz", font=f_wm, fill=(255, 255, 255, 140))
+
     y += f_date.getbbox(today)[3] + 20
 
     # ── Player rows ─────────────────────────────────────────────────────────────
