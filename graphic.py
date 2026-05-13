@@ -594,7 +594,7 @@ def build(players, stat_key, prev_ranks=None, output=None):
     y += f_date.getbbox(today)[3] + 20
 
     # ── Player rows ─────────────────────────────────────────────────────────────
-    TIKTOK_BOTTOM = 1230  # keep 120px clear for captions/sound
+    TIKTOK_BOTTOM = 1270  # keep 80px clear for captions/sound
     ROW_H   = (TIKTOK_BOTTOM - y - 6) // 10
     LOGO_SZ = 74
     SILO_SZ = ROW_H
@@ -676,10 +676,10 @@ def build(players, stat_key, prev_ranks=None, output=None):
             put(d, stat_str, STAT_R - sw, cy - f_stat.getbbox(stat_str)[3] // 2, f_stat, WHITE)
 
 
-    f_follow = font("OpenSans-Bold.ttf", 30)
-    follow_str = "Follow for daily MLB content"
+    f_follow = font("OpenSans-ExtraBold.ttf", 38)
+    follow_str = "FOLLOW FOR DAILY MLB CONTENT"
     fw = int(d.textlength(follow_str, font=f_follow))
-    d.text(((W - fw) // 2, 1265), follow_str, font=f_follow, fill=(255, 255, 255, 180))
+    d.text(((W - fw) // 2, 1288), follow_str, font=f_follow, fill=(255, 255, 255, 220))
 
     canvas.convert("RGB").save(output, "PNG")
     print(f"  Saved → {output}")
