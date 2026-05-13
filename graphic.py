@@ -575,7 +575,7 @@ def build(players, stat_key, prev_ranks=None, output=None):
 
     # ── Header ─────────────────────────────────────────────────────────────────
     ML = 44
-    y  = 100   # TikTok top safe zone (80-100px)
+    y  = 20   # small gap above title
 
     f_title = font("OpenSans-ExtraBold.ttf", 72)
     f_date  = font("OpenSans-Semibold.ttf", 28)
