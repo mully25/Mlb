@@ -575,7 +575,7 @@ def build(players, stat_key, prev_ranks=None, output=None):
 
     # ── Header ─────────────────────────────────────────────────────────────────
     ML = 44
-    y  = 30
+    y  = 100   # TikTok top safe zone (80-100px)
 
     f_title = font("OpenSans-ExtraBold.ttf", 72)
     f_date  = font("OpenSans-Semibold.ttf", 28)
@@ -590,7 +590,8 @@ def build(players, stat_key, prev_ranks=None, output=None):
     y += f_date.getbbox(today)[3] + 20
 
     # ── Player rows ─────────────────────────────────────────────────────────────
-    ROW_H   = (H - y - 6) // 10
+    TIKTOK_BOTTOM = 1230  # keep 120px clear for captions/sound
+    ROW_H   = (TIKTOK_BOTTOM - y - 6) // 10
     LOGO_SZ = 74
     SILO_SZ = ROW_H
     RANK_W  = 54
@@ -601,7 +602,7 @@ def build(players, stat_key, prev_ranks=None, output=None):
     f_stat  = font("OpenSans-ExtraBold.ttf", 52)
     f_sec   = font("OpenSans-Semibold.ttf", 22)
 
-    STAT_R = W - 60
+    STAT_R = W - 150  # TikTok right safe zone (120-150px for like/comment buttons)
 
     for i, p in enumerate(players):
         ry = y + i * ROW_H
