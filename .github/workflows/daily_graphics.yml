@@ -2,7 +2,8 @@ name: Update MLB Graphics Daily
 
 on:
   schedule:
-    - cron: '0 9 * * *'  # 4am ET every day
+    - cron: '0 4 * * *'   # midnight ET (catches most games finishing)
+    - cron: '0 6 * * *'   # 2am ET backstop for late West Coast games
   workflow_dispatch:        # allow manual trigger from GitHub
 
 permissions:
@@ -26,8 +27,31 @@ jobs:
       - name: Install dependencies
         run: pip install requests pillow numpy pandas python-dotenv scipy
 
-      - name: Generate graphics
-        run: python3 graphic.py
+      - name: Check games and generate graphics
+        run: |
+          python3 - <<'EOF'
+          import requests, datetime, subprocess, sys
+          from zoneinfo import ZoneInfo
+
+          et = ZoneInfo("America/New_York")
+          today = datetime.datetime.now(et).strftime("%Y-%m-%d")
+          try:
+              data = requests.get(
+                  f"https://statsapi.mlb.com/api/v1/schedule?sportId=1&date={today}",
+                  timeout=10
+              ).json()
+              dates = data.get("dates", [])
+              if dates:
+                  games = dates[0].get("games", [])
+                  not_final = [g for g in games if g["status"]["abstractGameState"] != "Final"]
+                  if not_final:
+                      print(f"⏳ {len(not_final)} game(s) not yet final — skipping this run")
+                      sys.exit(0)
+              print(f"✅ All games final — generating graphics")
+          except Exception as e:
+              print(f"⚠️ Could not check schedule ({e}) — proceeding anyway")
+          subprocess.run(["python3", "graphic.py"], check=True)
+          EOF
 
       - name: Commit and push updated graphics
         run: |
