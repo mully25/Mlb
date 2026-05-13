@@ -575,23 +575,23 @@ def build(players, stat_key, prev_ranks=None, output=None):
 
     # ── Header ─────────────────────────────────────────────────────────────────
     ML = 44
-    y  = 20   # small gap above title
+    y  = 10
 
-    f_title = font("OpenSans-ExtraBold.ttf", 72)
-    f_date  = font("OpenSans-Semibold.ttf", 28)
+    f_title = font("OpenSans-ExtraBold.ttf", 58)
+    f_date  = font("OpenSans-Semibold.ttf", 24)
 
     title_w = int(d.textlength(cfg["title"], font=f_title))
     put(d, cfg["title"], (W - title_w) // 2, y, f_title, WHITE)
-    y += f_title.getbbox(cfg["title"])[3] + 10
+    y += f_title.getbbox(cfg["title"])[3] + 4
 
     today  = datetime.now(ZoneInfo("America/New_York")).strftime("%m/%d/%Y")
     date_w = int(d.textlength(today, font=f_date))
     put(d, today, (W - date_w) // 2, y, f_date, WHITE)
 
-    f_wm = font("OpenSans-Semibold.ttf", 22)
-    d.text((ML, y + 3), "unclebensarroz", font=f_wm, fill=(255, 255, 255, 140))
+    f_wm = font("OpenSans-Semibold.ttf", 20)
+    d.text((ML, y + 2), "unclebensarroz", font=f_wm, fill=(255, 255, 255, 140))
 
-    y += f_date.getbbox(today)[3] + 20
+    y += f_date.getbbox(today)[3] + 8
 
     # ── Player rows ─────────────────────────────────────────────────────────────
     TIKTOK_BOTTOM = 1270  # keep 80px clear for captions/sound
