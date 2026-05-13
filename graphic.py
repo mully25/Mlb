@@ -679,7 +679,10 @@ def build(players, stat_key, prev_ranks=None, output=None):
     f_follow = font("OpenSans-ExtraBold.ttf", 38)
     follow_str = "FOLLOW FOR DAILY MLB CONTENT"
     fw = int(d.textlength(follow_str, font=f_follow))
-    d.text(((W - fw) // 2, 1275), follow_str, font=f_follow, fill=(255, 255, 255, 220))
+    fh = f_follow.getbbox(follow_str)[3]
+    rows_end = y + 10 * ROW_H
+    follow_y = rows_end + (H - rows_end - fh) // 2
+    d.text(((W - fw) // 2, follow_y), follow_str, font=f_follow, fill=(255, 255, 255, 220))
 
     canvas.convert("RGB").save(output, "PNG")
     print(f"  Saved → {output}")
