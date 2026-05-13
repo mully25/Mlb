@@ -665,15 +665,18 @@ def build(players, stat_key, prev_ranks=None, output=None):
         if sec_val is not None and sec_col and sec_col in sec_val:
             sec_num    = float(sec_val[sec_col])
             sec_str    = f"{sec_lbl}: " + (_avg(sec_num) if sec_num < 2 else _f2(sec_num))
-            stat_blk_h = f_stat.getbbox(stat_str)[3] + 6 + f_sec.getbbox(sec_str)[3]
+            stat_bbox  = f_stat.getbbox(stat_str)
+            sec_bbox   = f_sec.getbbox(sec_str)
+            stat_blk_h = stat_bbox[3] + 6 + sec_bbox[3]
             sy         = cy - stat_blk_h // 2
             sw         = int(d.textlength(stat_str, font=f_stat))
             put(d, stat_str, STAT_R - sw, sy, f_stat, WHITE)
             xw = int(d.textlength(sec_str, font=f_sec))
-            put(d, sec_str, STAT_R - xw, sy + f_stat.getbbox(stat_str)[3] + 4, f_sec, WHITE)
+            put(d, sec_str, STAT_R - xw, sy + stat_bbox[3] + 4, f_sec, WHITE)
         else:
+            bbox = f_stat.getbbox(stat_str)
             sw = int(d.textlength(stat_str, font=f_stat))
-            put(d, stat_str, STAT_R - sw, cy - f_stat.getbbox(stat_str)[3] // 2, f_stat, WHITE)
+            put(d, stat_str, STAT_R - sw, cy - (bbox[1] + bbox[3]) // 2, f_stat, WHITE)
 
 
     f_follow = font("OpenSans-ExtraBold.ttf", 38)
