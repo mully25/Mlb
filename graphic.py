@@ -575,7 +575,7 @@ def build(players, stat_key, prev_ranks=None, output=None):
 
     # ── Header ─────────────────────────────────────────────────────────────────
     ML = 44
-    y  = 5
+    y  = 6
 
     f_title = font("OpenSans-ExtraBold.ttf", 72)
     f_date  = font("OpenSans-Semibold.ttf", 28)
