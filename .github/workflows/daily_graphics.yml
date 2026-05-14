@@ -45,7 +45,7 @@ jobs:
           import json, datetime, urllib.request, os
 
           REPO    = "mully25/Mlb"
-          BRANCH  = "claude/expand-graphic-photos-hP3p3"
+          BRANCH  = "claude/mlb-xwoba-top-10-graphic-LjKzs"
           RAW     = f"https://raw.githubusercontent.com/{REPO}/{BRANCH}"
 
           ROTATION = [
