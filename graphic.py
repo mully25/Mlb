@@ -370,14 +370,20 @@ def prefetch_bref_cache(keys):
         if i > 0:
             print("  Waiting 30s before next Baseball Reference request…")
             time.sleep(30)
-        _download_bref_file(bref_type)
+        try:
+            _download_bref_file(bref_type)
+        except ValueError as e:
+            print(f"  WARNING: {e} — skipping {bref_type} graphics")
 
 
 def _fetch_bref_war_top10(bref_type, games):
     """Fetch WAR from locally-cached Baseball Reference data."""
     cache_path = os.path.join(CACHE_DIR, f"bref_war_{bref_type}.txt")
     if not os.path.exists(cache_path):
-        _download_bref_file(bref_type)
+        try:
+            _download_bref_file(bref_type)
+        except ValueError:
+            raise RuntimeError(f"No cache for bref {bref_type} and download failed")
     with open(cache_path, encoding="utf-8") as f:
         text = f.read()
     df = pd.read_csv(io.StringIO(text), on_bad_lines="skip", engine="python")

@@ -24,7 +24,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install requests pillow numpy pandas python-dotenv scipy
+        run: pip install requests pillow numpy pandas python-dotenv scipy tzdata
 
       - name: Generate graphics
         run: python3 graphic.py
@@ -45,7 +45,7 @@ jobs:
           import json, datetime, urllib.request, os
 
           REPO    = "mully25/Mlb"
-          BRANCH  = "claude/mlb-xwoba-top-10-graphic-LjKzs"
+          BRANCH  = "claude/expand-graphic-photos-hP3p3"
           RAW     = f"https://raw.githubusercontent.com/{REPO}/{BRANCH}"
 
           ROTATION = [
