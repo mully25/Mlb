@@ -28,7 +28,6 @@ jobs:
 
       - name: Generate graphics
         run: python3 graphic.py
-          EOF
 
       - name: Commit and push updated graphics
         run: |
