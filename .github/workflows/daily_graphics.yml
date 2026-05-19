@@ -71,9 +71,9 @@ jobs:
               ("pitching/w_top10.png",    "Win Leaders 🏆 #MLB #Baseball #Stats"),
 
               ("hitting/hits_top10.png",  "Hit Leaders 🏆 #MLB #Baseball #Stats"),
-              ("pitching/pwar_top10.png", "Pitching WAR Leaders 🏆 #MLB #Baseball #Stats"),
+              ("pitching/fip_top10.png",  "FIP Leaders 🏆 #MLB #Baseball #Stats"),
               ("hitting/r_top10.png",     "Runs Leaders 🏆 #MLB #Baseball #Stats"),
-              ("hitting/hwar_top10.png",  "Batting WAR Leaders 🏆 #MLB #Baseball #Stats"),
+              ("pitching/baa_top10.png",  "BAA Leaders 🏆 #MLB #Baseball #Stats"),
           ]
 
           day = datetime.date.today().timetuple().tm_yday

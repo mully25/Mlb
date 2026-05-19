@@ -52,8 +52,6 @@ STAT_CONFIG = {
     "hits": {"title": "HIT LEADERS",              "group": "hitting",  "mlb_cat": "hits",                      "rank": "largest",  "fmt": _int, "folder": "hitting"},
     "sb":   {"title": "STOLEN BASE LEADERS",      "group": "hitting",  "mlb_cat": "stolenBases",               "rank": "largest",  "fmt": _int, "folder": "hitting"},
     "r":    {"title": "RUNS LEADERS",             "group": "hitting",  "mlb_cat": "runs",                      "rank": "largest",  "fmt": _int, "folder": "hitting"},
-    "hwar": {"title": "POSITION PLAYER WAR LEADERS", "group": "hitting", "rank": "largest", "fmt": _f1, "folder": "hitting",
-             "source": "bref_war", "bref_type": "bat"},
     # ── pitching ───────────────────────────────────────────────────────────────
     "era":  {"title": "ERA LEADERS",              "group": "pitching", "mlb_cat": "earnedRunAverage",          "rank": "smallest", "fmt": _f2,  "folder": "pitching",
              "secondary": {"label": "xERA",  "col": "xera",     "type": "pitcher"}},
@@ -66,8 +64,6 @@ STAT_CONFIG = {
              "source": "bdfed_computed_fip"},
     "baa":  {"title": "BAA LEADERS",             "group": "pitching", "mlb_cat": "battingAverage",             "rank": "smallest", "fmt": _avg, "folder": "pitching",
              "secondary": {"label": "xBA",   "col": "est_ba",   "type": "pitcher"}},
-    "pwar": {"title": "PITCHER WAR LEADERS",     "group": "pitching", "rank": "largest", "fmt": _f1, "folder": "pitching",
-             "source": "bref_war", "bref_type": "pit"},
 }
 
 # ── Team hat colors ────────────────────────────────────────────────────────────
