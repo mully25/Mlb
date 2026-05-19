@@ -79,7 +79,7 @@ TEAM_COLORS = {
     "Chicago Cubs":          ( 14,  51, 134),   # #0E3386
     "Chicago White Sox":     ( 39,  37,  31),   # #27251F
     "Cincinnati Reds":       (198,   1,  31),   # #C6011F
-    "Cleveland Guardians":   (  0,  43,  92),   # #002B5C
+    "Cleveland Guardians":   (204,   0,  36),   # #CC0024 red (swapped)
     "Colorado Rockies":      ( 51,   0, 111),   # #33006F
     "Detroit Tigers":        (  0,  30,  98),   # #001E62
     "Houston Astros":        (  0,  45,  98),   # #002D62
@@ -106,7 +106,8 @@ TEAM_COLORS = {
 
 # Teams whose logo should be recolored to a solid color (R, G, B)
 LOGO_TINT = {
-    "Cincinnati Reds":    (255, 255, 255),
+    "Cincinnati Reds":     (255, 255, 255),
+    "Cleveland Guardians": (255, 255, 255),
     "St. Louis Cardinals": (255, 255, 255),
 }
 
