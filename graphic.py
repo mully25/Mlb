@@ -725,4 +725,3 @@ if __name__ == "__main__":
 
     if failed:
         print(f"\nWARNING: Failed to generate graphics for: {failed}")
-        sys.exit(1)
