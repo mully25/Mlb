@@ -1,0 +1,21 @@
+name: Keepalive Trigger
+
+on:
+  schedule:
+    - cron: '30 7 * * *'  # 3:30am ET (7:30am UTC) — 30 min before main workflow
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger daily graphics workflow
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/mully25/Mlb/actions/workflows/daily_graphics.yml/dispatches \
+            -d '{"ref":"claude/mlb-xwoba-top-10-graphic-LjKzs"}'

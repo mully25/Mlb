@@ -35,9 +35,10 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add hitting/ pitching/ _cache/rankings.json _cache/bref_war_bat.txt _cache/bref_war_pit.txt || true
+          git add hitting/ pitching/ _cache/rankings.json || true
           git diff --staged --quiet || git commit -m "Update graphics $(date +'%Y-%m-%d')"
-          git push
+          git pull --rebase origin claude/mlb-xwoba-top-10-graphic-LjKzs
+          git push origin claude/mlb-xwoba-top-10-graphic-LjKzs
 
       - name: Send today's post to Make.com
         if: ${{ secrets.MAKE_WEBHOOK_URL != '' }}
