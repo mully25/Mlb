@@ -4,6 +4,14 @@ on:
   schedule:
     - cron: '0 9 * * *'  # 5am ET (9am UTC) — backup run after main workflow
   workflow_dispatch:
+  push:
+    branches:
+      - claude/mlb-xwoba-top-10-graphic-LjKzs
+    paths-ignore:
+      - 'hitting/**'
+      - 'pitching/**'
+      - '_cache/**'
+      - '.github/**'
 
 permissions:
   contents: write
